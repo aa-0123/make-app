@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>出席確認 - 学生証登録</title>
+</head>
+<body>
+    <h1>出席確認アプリ（学生証登録）</h1>
+    <p>学生番号と、学生証の左下にある番号を入力して「登録する」ボタンを押してください。</p>
+
+    <hr>
+
+    <!-- 入力エリア -->
+    <div>
+        <label>学籍番号: <input type="text" id="student-id" placeholder="例: S01"></label>
+    </div>
+    <br>
+    <div>
+        <label>学生証の番号: <input type="text" id="card-number" placeholder="例: 12345678"></label>
+    </div>
+    <br>
+    <button onclick="registerCard()">登録する</button>
+
+    <hr>
+
+    <!-- 結果確認用 -->
+    <p id="log-display" style="color: blue; font-weight: bold;">ここに結果が表示されます。</p>
+
+    <script>
+        function registerCard() {
+            var studentId = document.getElementById("student-id").value;
+            var cardNumber = document.getElementById("card-number").value;
+
+            // 未入力がないかチェック
+            if (!studentId || !cardNumber) {
+                document.getElementById("log-display").innerText = "エラー: 両方入力してください。";
+                document.getElementById("log-display").style.color = "red";
+                return;
+            }
+
+            // 登録結果を表示
+            document.getElementById("log-display").innerText = "登録完了! 学籍番号: " + studentId + " (カード番号: " + cardNumber + ")";
+            document.getElementById("log-display").style.color = "green";
+        }
+    </script>
+</body>
+</html>
