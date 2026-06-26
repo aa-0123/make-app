@@ -2,45 +2,284 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>出席確認 - 学生証登録</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>出席確認 - 学生証登録 & 時間割</title>
+    <style>
+        /* 全体のおしゃれでシンプルなスタイル */
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #1e3a8a;
+            margin-top: 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* 結果ログ用表示エリア */
+        #log-display {
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* 時間割のエリア（最初は非表示） */
+        #timetable-area {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* テーブル（時間割）のスタイル */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            color: #1e3a8a;
+            font-weight: bold;
+        }
+
+        td {
+            height: 50px;
+            background-color: #fafafa;
+        }
+
+        /* 時間表示列のスタイル */
+        .period-col {
+            font-weight: bold;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            width: 80px;
+        }
+
+        /* 曜日列の幅調整 */
+        th:not(.period-col) {
+            width: 15%;
+        }
+
+        /* 特定のコマに色をつける（デモ用） */
+        .subject {
+            background-color: #eff6ff;
+            color: #1e40af;
+            font-weight: 500;
+            border-radius: 4px;
+            padding: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1>出席確認アプリ（学生証登録）</h1>
-    <p>学生番号と、学生証の左下にある番号を入力して「登録する」ボタンを押してください。</p>
 
-    <hr>
+    <div class="container">
+        <h1>出席確認アプリ（学生証登録）</h1>
+        <p>学籍番号と、学生証の左下にある番号を入力して「登録する」ボタンを押してください。<br>登録が完了すると、あなたの授業時間割（月曜〜土曜、1〜6限）が表示されます。</p>
 
-    <!-- 入力エリア -->
-    <div>
-        <label>学籍番号: <input type="text" id="student-id" placeholder="例: S01"></label>
+        <!-- 入力エリア -->
+        <div class="form-group">
+            <label for="student-id">学籍番号</label>
+            <input type="text" id="student-id" placeholder="例: S01">
+        </div>
+        
+        <div class="form-group">
+            <label for="card-number">学生証の番号 (左下の番号)</label>
+            <input type="text" id="card-number" placeholder="例: 12345678">
+        </div>
+
+        <button onclick="registerCard()">登録する</button>
+
+        <!-- メッセージ表示エリア -->
+        <div id="log-display"></div>
+
+        <!-- 登録後に表示される時間割エリア -->
+        <div id="timetable-area">
+            <h2 style="font-size: 18px; color: #1e3a8a; margin-bottom: 5px;">📅 あなたの時間割 (月曜〜土曜)</h2>
+            <p style="margin-bottom: 15px;">登録情報に基づいて、現在の学期の時間割を表示しています。</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th class="period-col">時限</th>
+                        <th>月</th>
+                        <th>火</th>
+                        <th>水</th>
+                        <th>木</th>
+                        <th>金</th>
+                        <th>土</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="period-col">1限<br><span style="font-size:10px;font-weight:normal;">9:00~10:30</span></td>
+                        <td><div class="subject">英語Ⅰ</div></td>
+                        <td>-</td>
+                        <td><div class="subject">応用情報工学</div></td>
+                        <td>-</td>
+                        <td><div class="subject">情報数理</div></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td class="period-col">2限<br><span style="font-size:10px;font-weight:normal;">10:40~12:10</span></td>
+                        <td>-</td>
+                        <td><div class="subject">プログラミング</div></td>
+                        <td>-</td>
+                        <td><div class="subject">物理学基礎</div></td>
+                        <td>-</td>
+                        <td><div class="subject">キャリアデザイン</div></td>
+                    </tr>
+                    <tr>
+                        <td class="period-col">3限<br><span style="font-size:10px;font-weight:normal;">13:00~14:30</span></td>
+                        <td><div class="subject">離散数学</div></td>
+                        <td>-</td>
+                        <td><div class="subject">ソフトウェア工学</div></td>
+                        <td>-</td>
+                        <td><div class="subject">英語表現</div></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td class="period-col">4限<br><span style="font-size:10px;font-weight:normal;">14:40~16:10</span></td>
+                        <td>-</td>
+                        <td><div class="subject">工学概論</div></td>
+                        <td>-</td>
+                        <td><div class="subject">データベース</div></td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td class="period-col">5限<br><span style="font-size:10px;font-weight:normal;">16:20~17:50</span></td>
+                        <td><div class="subject">PBL演習</div></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><div class="subject">データ構造</div></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td class="period-col">6限<br><span style="font-size:10px;font-weight:normal;">18:00~19:30</span></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <br>
-    <div>
-        <label>学生証の番号: <input type="text" id="card-number" placeholder="例: 12345678"></label>
-    </div>
-    <br>
-    <button onclick="registerCard()">登録する</button>
-
-    <hr>
-
-    <!-- 結果確認用 -->
-    <p id="log-display" style="color: blue; font-weight: bold;">ここに結果が表示されます。</p>
 
     <script>
         function registerCard() {
-            var studentId = document.getElementById("student-id").value;
-            var cardNumber = document.getElementById("card-number").value;
+            var studentId = document.getElementById("student-id").value.trim();
+            var cardNumber = document.getElementById("card-number").value.trim();
+            var logDisplay = document.getElementById("log-display");
+            var timetableArea = document.getElementById("timetable-area");
 
-            // 未入力がないかチェック
+            // 未入力チェック
             if (!studentId || !cardNumber) {
-                document.getElementById("log-display").innerText = "エラー: 両方入力してください。";
-                document.getElementById("log-display").style.color = "red";
+                logDisplay.style.display = "block";
+                logDisplay.innerText = "エラー: 学籍番号と学生証の番号をどちらも入力してください。";
+                logDisplay.style.backgroundColor = "#fee2e2";
+                logDisplay.style.color = "#991b1b";
+                
+                // 時間割を非表示にする
+                timetableArea.style.display = "none";
                 return;
             }
 
-            // 登録結果を表示
-            document.getElementById("log-display").innerText = "登録完了! 学籍番号: " + studentId + " (カード番号: " + cardNumber + ")";
-            document.getElementById("log-display").style.color = "green";
+            // 登録完了時の表示処理
+            logDisplay.style.display = "block";
+            logDisplay.innerText = "🎉 登録完了! 学籍番号: " + studentId + " (カード番号: " + cardNumber + " をシステムに関連付けました)";
+            logDisplay.style.backgroundColor = "#dcfce7";
+            logDisplay.style.color = "#166534";
+
+            // 時間割をふわっと表示させる
+            timetableArea.style.display = "block";
         }
     </script>
 </body>
