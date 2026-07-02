@@ -47,7 +47,7 @@
     <div id="portal-tabs" class="hidden max-w-6xl mx-auto px-4 mt-6">
         <div class="flex border-b border-slate-200 bg-white rounded-t-xl overflow-hidden shadow-sm">
             <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-4 text-center font-bold text-sm transition-all duration-150 border-b-2 border-indigo-600 text-indigo-600 bg-white flex justify-center items-center gap-2">
-                <span>👤</span> 学生ポータル (閲覧・救済申請・連絡)
+                <span>👤</span> 学生ポータル (閲覧・仮出席・救済申請・連絡)
             </button>
             <button id="tab-teacher" onclick="switchPortal('teacher')" class="flex-1 py-4 text-center font-bold text-sm transition-all duration-150 border-b-2 border-transparent text-slate-500 hover:text-indigo-600 hover:bg-slate-50 flex justify-center items-center gap-2">
                 <span>👨‍🏫</span> 教員用管理ポータル (照合・一括上書き更新)
@@ -115,18 +115,56 @@
                         <span>ℹ️</span> 学生用の案内
                     </h2>
                     <p class="text-xs text-indigo-700 mt-1 leading-relaxed">
-                        学生は自分で出席・遅刻等の編集はできません。各自授業の開始時に学生証を「救済申請」や教員の提示する確認紙（出席票や授業内課題など）をクリアしてください。教員が提出状況と照合し、出席状況を上書き更新します（紙の提出がない場合、打刻があっても「ピ逃げ確定」となります）。
+                        学生は自分で出席・遅刻等の編集はできません。授業開始時に「学生証 擬似打刻シミュレーター」でタッチすると、自動的に対象授業が<strong>「仮出席」</strong>（仮登録）状態になります。その後、授業終了時に教員の提示する確認紙（出席票や授業内課題など）を必ず提出してください。教員が提出物と仮出席打刻を照合し、「出席」または「不正出席」を上書き確定します。
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6">
-                    <!-- 学生不携帯救済申請 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 💳 学生証擬似打刻シミュレーター (タッチ完了で仮出席へ) -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 animate-pulse-once">
+                        <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
+                            <span class="text-lg">💳</span> 学生証 擬似打刻シミュレーター (タッチで仮出席登録)
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">現在のログイン学生</label>
+                                    <input type="text" id="student-display-name" disabled class="w-full p-2.5 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">対象の講義</label>
+                                    <select id="touch-subject-select" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                        <option value="ソフトウェア">ソフトウェア工学</option>
+                                        <option value="データベース">データベース</option>
+                                        <option value="PBL演習">PBL演習</option>
+                                        <option value="英語Ⅰ">英語Ⅰ</option>
+                                        <option value="データ構造">データ構造</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">学生証の左下番号</label>
+                                    <input type="text" id="student-card-input" placeholder="登録した左下番号を入力" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">本人確認パスワード</label>
+                                    <input type="password" id="student-touch-password" placeholder="登録したパスワードを入力" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                            <button onclick="executeStudentTouch()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-lg shadow-sm transition-all duration-150">
+                                学生証をタッチする（仮出席に自動変換）
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 📝 学生不携帯救済申請 -->
                     <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
                         <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
                             <span class="text-lg">📝</span> タッチ忘れ・学生証不携帯の申請
                         </h3>
                         <div class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">申請者（現在の学生）</label>
                                     <input type="text" id="apply-student-display-name" disabled class="w-full p-2.5 text-sm bg-slate-100 border border-slate-300 rounded-lg text-slate-500 font-bold">
@@ -141,14 +179,16 @@
                                         <option value="データ構造">データ構造</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 mb-1">本人確認パスワード</label>
                                     <input type="password" id="student-auth-password" placeholder="登録したパスワードを入力" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
                                 </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">具体的な申請理由</label>
-                                <textarea id="apply-reason" rows="2" placeholder="理由を入力してください（例：学生証を忘れてしまいました。授業内ペーパーは提出済です）" class="w-full p-2.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"></textarea>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">具体的な申請理由</label>
+                                    <input type="text" id="apply-reason" placeholder="（例）忘失のため。対面ペーパー提出済。" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                </div>
                             </div>
                             <button onclick="submitStudentApplication()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg shadow-sm transition-all duration-150">
                                 救済申請を教員へ提出する (虚偽申請はペナルティ対象)
@@ -274,7 +314,7 @@
                             <h3 class="font-bold text-slate-800 text-sm">全体の連絡事項・不正発生通知</h3>
                         </div>
                         <div id="global-notifications" class="space-y-3 max-h-64 overflow-y-auto">
-                            <!-- JSで虚偽の打刻（ピ逃げ確定された学籍番号など）が自動通知されます -->
+                            <!-- JSで不正出席が自動通知されます -->
                         </div>
                     </div>
 
@@ -317,7 +357,7 @@
                                 <span>🔑</span> 教員管理権限 (認証完了)
                             </h2>
                             <p class="text-xs text-amber-800 mt-1">
-                                教員は学生から回収した「紙の出席票」や「確認小テスト」と、学生証の「打刻時間」を照らし合わせて、ステータスを直接決定・変更します。
+                                教員は学生から回収した「紙の出席票」や「確認小テスト」と、学生証の「打刻時間（仮出席）」を照らし合わせて、ステータスを直接決定・変更します。
                             </p>
                         </div>
                         <div class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-semibold">
@@ -425,8 +465,8 @@
             initStudentAttendance(studentId);
         });
 
-        // テストデモ用に初期段階でS01が第8回(Index: 7)のデータベースで「ピ逃げ確定」判定にされている例を事前に作る
-        globalAttendanceData["S01"]["データベース"][7] = "ピ逃げ確定";
+        // テストデモ用に初期段階でS01が第8回(Index: 7)のデータベースで「不正出席」判定にされている例を事前に作る
+        globalAttendanceData["S01"]["データベース"][7] = "不正出席";
 
         function initStudentAttendance(studentId) {
             globalAttendanceData[studentId] = {};
@@ -442,7 +482,7 @@
                     } else {
                         // デフォルトで未処理の回は「欠席」
                         if (studentId === "S01" && subject === "データベース" && r === 7) {
-                            // ピ逃げ設定を残すためスキップ
+                            // 不正出席設定を残すためスキップ
                             continue;
                         }
                         globalAttendanceData[studentId][subject].push("欠席");
@@ -523,6 +563,7 @@
             authenticatedStudentId = studentId;
 
             // 各ポータル用入力欄にログイン情報を反映
+            document.getElementById("student-display-name").value = `${studentId} - ${studentsList[studentId].name}`;
             document.getElementById("apply-student-display-name").value = `${studentId} - ${studentsList[studentId].name}`;
 
             // 認証画面を隠し、メインポータルをアンロック
@@ -611,7 +652,7 @@
                 const records = globalAttendanceData[authenticatedStudentId][subject];
                 let attendCount = 0;
                 records.forEach(status => {
-                    if (status === "出席" || status === "公欠" || status === "遅刻") {
+                    if (status === "出席" || status === "公欠" || status === "遅刻" || status === "仮出席") {
                         attendCount++;
                     }
                 });
@@ -653,7 +694,7 @@
             let attendCount = 0;
 
             records.forEach((status, i) => {
-                if (status === "出席" || status === "公欠" || status === "遅刻") {
+                if (status === "出席" || status === "公欠" || status === "遅刻" || status === "仮出席") {
                     attendCount++;
                 }
 
@@ -663,8 +704,9 @@
                 let badgeClass = "bg-slate-100 text-slate-700";
                 if (status === "出席") badgeClass = "bg-green-100 text-green-800 font-semibold";
                 if (status === "遅刻") badgeClass = "bg-yellow-100 text-yellow-800 font-semibold";
+                if (status === "仮出席") badgeClass = "bg-amber-100 text-amber-800 font-semibold border border-amber-300 animate-pulse";
                 if (status === "欠席") badgeClass = "bg-slate-100 text-slate-400";
-                if (status === "ピ逃げ確定") badgeClass = "bg-red-100 text-red-800 font-bold border border-red-200 animate-pulse";
+                if (status === "不正出席") badgeClass = "bg-red-100 text-red-800 font-bold border border-red-200 animate-pulse";
 
                 item.innerHTML = `
                     <div class="text-[10px] text-slate-400">第 ${i+1} 回</div>
@@ -674,6 +716,60 @@
             });
 
             document.getElementById("student-summary-count").innerText = attendCount;
+        }
+
+        // 学生：学生証を擬似タッチする (仮出席として自動登録される)
+        function executeStudentTouch() {
+            const studentId = authenticatedStudentId;
+            const inputCard = document.getElementById("student-card-input").value.trim();
+            const inputPass = document.getElementById("student-touch-password").value.trim();
+            const correctCard = studentsList[studentId].card;
+            const correctPass = studentsList[studentId].password;
+
+            if (!inputCard) {
+                showAlert("エラー: 学生証の左下番号を入力してください。", "error");
+                return;
+            }
+
+            if (!inputPass) {
+                showAlert("セキュリティエラー: 打刻認証用の本人確認パスワードを入力してください。", "error");
+                return;
+            }
+
+            if (inputCard !== correctCard) {
+                showAlert("認証エラー: 学生証のカード番号が一致しません。", "error");
+                return;
+            }
+
+            if (inputPass !== correctPass) {
+                showAlert("セキュリティエラー: パスワードが一致しません。本人確認に失敗しました。", "error");
+                return;
+            }
+
+            // 打刻ログの追加 (現在時刻を登録)
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            
+            // 週数を判定して自動で該当講義回にマッピング
+            const inputDateVal = document.getElementById("simulate-date").value;
+            const currentDate = new Date(inputDateVal);
+            const diffDays = Math.floor((currentDate - BASE_DATE) / (1000 * 60 * 60 * 24));
+            const calculatedRound = Math.max(0, Math.min(12, Math.floor(diffDays / 7)));
+
+            studentsList[studentId].touchLog[calculatedRound] = timeStr;
+
+            // 対象講義の選択された値
+            const targetSubject = document.getElementById("touch-subject-select").value;
+            
+            // 出席ステータスを【仮出席】に自動で変更
+            globalAttendanceData[studentId][targetSubject][calculatedRound] = "仮出席";
+
+            showAlert(`🎉 学生証認証成功！講義「${targetSubject}」の第 ${calculatedRound + 1} 回を出席ステータス【仮出席】として自動登録しました。教員が対面確認（紙課題/出席票）と照合して最終出席を登録します。`, "success");
+            
+            document.getElementById("student-card-input").value = "";
+            document.getElementById("student-touch-password").value = ""; // 入力クリア
+            updateStudentView();
+            renderNotifications();
         }
 
         // 学生：救済申請の提出
@@ -734,6 +830,11 @@
                 const currentStatus = globalAttendanceData[studentId][subject][roundIndex];
 
                 const tr = document.createElement("tr");
+                // 仮出席だった場合は教員ポータルのテーブル行を少しハイライトする
+                const isTempAttendance = currentStatus === "仮出席";
+                const rowBgClass = isTempAttendance ? "bg-amber-50/50" : "";
+
+                tr.className = rowBgClass;
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-slate-700">${studentId}</td>
                     <td class="p-3 text-slate-700">${sInfo.name}</td>
@@ -741,12 +842,13 @@
                         ${touchTime ? `<span class="text-green-600 font-bold">⏰ 打刻あり (${touchTime})</span>` : `<span class="text-slate-400">❌ 打刻記録なし</span>`}
                     </td>
                     <td class="p-3">
-                        <select data-student="${studentId}" class="p-1 text-xs border rounded bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
+                        <select data-student="${studentId}" class="p-1 text-xs border rounded bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500 ${isTempAttendance ? 'border-amber-300 bg-amber-50 text-amber-800' : ''}">
                             <option value="出席" ${currentStatus === "出席" ? "selected" : ""}>出席</option>
+                            <option value="仮出席" ${currentStatus === "仮出席" ? "selected" : ""}>仮出席 (学生打刻のみ)</option>
                             <option value="欠席" ${currentStatus === "欠席" ? "selected" : ""}>欠席</option>
                             <option value="遅刻" ${currentStatus === "遅刻" ? "selected" : ""}>遅刻</option>
                             <option value="公欠" ${currentStatus === "公欠" ? "selected" : ""}>公欠</option>
-                            <option value="ピ逃げ確定" ${currentStatus === "ピ逃げ確定" ? "selected" : ""}>🚨 ピ逃げ確定 (不正行為)</option>
+                            <option value="不正出席" ${currentStatus === "不正出席" ? "selected" : ""}>🚨 不正出席 (不正行為)</option>
                         </select>
                     </td>
                 `;
@@ -768,7 +870,7 @@
 
             showAlert(`💾 「${subject}」第 ${roundIndex + 1} 回講義の出席情報を、教員の判定（手元の出席票と照合）に基づき上書き確定しました。`, "success");
             loadTeacherControlTable();
-            renderNotifications(); // 連絡事項（ピ逃げ不正など）を即座に再構成
+            renderNotifications(); // 連絡事項（不正出席など）を即座に再構成
         }
 
         // 教員：届いた申請リストの表示
@@ -890,11 +992,11 @@
             personalContainer.appendChild(baseNotify);
 
 
-            // 2. 【全体の連絡事項】の表示構築 (「ピ逃げ確定」状態の学生を自動検知して通知)
+            // 2. 【全体の連絡事項】の表示構築 (「不正出席」状態の学生を自動検知して通知)
             const globalContainer = document.getElementById("global-notifications");
             globalContainer.innerHTML = "";
 
-            // メモリDB全体から「ピ逃げ確定」判定になっている学生・授業をスキャンして警告を作成
+            // メモリDB全体から「不正出席」判定になっている学生・授業をスキャンして警告を作成
             let fraudCount = 0;
 
             Object.keys(globalAttendanceData).forEach(studentId => {
@@ -904,19 +1006,19 @@
                 Object.keys(subData).forEach(subject => {
                     const rounds = subData[subject];
                     rounds.forEach((status, i) => {
-                        if (status === "ピ逃げ確定") {
+                        if (status === "不正出席") {
                             fraudCount++;
                             const fraudItem = document.createElement("div");
                             // 警告らしい赤色のアナウンスパネル
                             fraudItem.className = "p-3 bg-red-100 border border-red-200 rounded-lg text-xs text-red-900 shadow-sm animate-pulse";
                             fraudItem.innerHTML = `
                                 <div class="font-bold flex items-center gap-1.5 mb-1 text-red-800">
-                                    <span>🚨</span> 不正行為警告（虚偽出席の検知）
+                                    <span>🚨</span> 不正行為警告（不正出席の検知）
                                 </div>
                                 <p class="leading-relaxed text-[11px]">
-                                    <strong>学籍番号: ${studentId} (${sName})</strong> が、講義「<strong>${subject}（第 ${i+1} 回）</strong>」にて、授業開始時の学生証打刻のみを行い、授業終わりの対面確認（紙課題/出席票）が確認できませんでした。
+                                    <strong>学籍番号: ${studentId} (${sName})</strong> が、講義「<strong>${subject}（第 ${i+1} 回）</strong>」にて、授業開始時の学生証打刻（仮出席）のみを行い、授業終わりの対面確認（紙課題/出席票）が確認できませんでした。
                                 </p>
-                                <div class="mt-1.5 font-bold text-[10px] text-red-600">【処分内容】当該回の出席を「ピ逃げ（不正）」に変更し、総出席率の評価を引き下げます。</div>
+                                <div class="mt-1.5 font-bold text-[10px] text-red-600">【処分内容】当該回の出席を「不正出席」に変更し、総出席率の評価を引き下げます。</div>
                             `;
                             globalContainer.appendChild(fraudItem);
                         }
