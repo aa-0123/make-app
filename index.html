@@ -101,15 +101,51 @@
                         <span>ℹ️</span> 学生用の案内
                     </h2>
                     <p class="text-xs text-indigo-700 mt-1 leading-relaxed">
-                        学生は自分で最終出席の編集はできません。時間割の科目を選択し、右側の詳細パネルから<strong>「学生証をタッチする」</strong>ことで自動的にその講義が<strong>「仮出席」</strong>（オレンジ色）状態になり、確認メールがあなた宛ての連絡事項に届きます。
+                        学生は自分で最終出席の編集はできません。時間割の科目を選択し、右側の詳細パネルから<strong>「学生証をタッチする」</strong>することで自動的にその講義が<strong>「仮出席」</strong>（オレンジ色）状態になり、確認メールがあなた宛ての連絡事項に届きます。なお、不携帯救済申請は、<strong>該当講義の当日のみ</strong>申請可能です。
                     </p>
+                </div>
+
+                <!-- ⚙️ 時間割カスタマイズ設定エリア -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <details class="group">
+                        <summary class="list-none flex justify-between items-center font-bold text-slate-700 text-sm cursor-pointer select-none">
+                            <span class="flex items-center gap-2">
+                                <span class="text-lg">⚙️</span> 個人時間割のカスタム設定 (あなたの時間割を編集)
+                            </span>
+                            <span class="transition group-open:rotate-180 text-xs text-slate-400">▼ クリックして開閉</span>
+                        </h3Summary>
+                        <div class="mt-4 space-y-4 pt-4 border-t border-slate-200 text-xs">
+                            <p class="text-slate-500 mb-2">自身が履修している講義名を設定してください。空欄にした場合は「-」として表示されます。</p>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border text-center border-slate-200 bg-white">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-700 font-semibold">
+                                            <th class="p-2 border">時限</th>
+                                            <th class="p-2 border">月</th>
+                                            <th class="p-2 border">火</th>
+                                            <th class="p-2 border">水</th>
+                                            <th class="p-2 border">木</th>
+                                            <th class="p-2 border">金</th>
+                                            <th class="p-2 border">土</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="settings-timetable-tbody">
+                                        <!-- JSで時間割設定用入力フォームを生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button onclick="saveCustomTimetable()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow transition">
+                                設定した時間割を保存して反映する
+                            </button>
+                        </div>
+                    </details>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
                     <!-- 不携帯救済申請 -->
                     <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
                         <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
-                            <span class="text-lg">📝</span> タッチ忘れ・学生証不携帯の申請
+                            <span class="text-lg">📝</span> タッチ忘れ・学生証不携帯の申請 (※ 授業当日のみ申請可能)
                         </h3>
                         <div class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -359,6 +395,7 @@
         </div>
     </main>
 
+    <!-- 4. JSスクリプト (メモリ上でのデータ管理とシミュレーション) -->
     <script>
         // --- データベース定義 (メモリ) ---
         const studentsList = {
@@ -367,12 +404,13 @@
             "S03": { name: "鈴木 一郎", card: "444555666", touchLog: {}, password: "" }
         };
 
-        const timetableMap = [
-            { period: "1限<br>9:00",  mon: "英語Ⅰ", tue: "", wed: "応用情報", thu: "", fri: "情報数理", sat: "" },
-            { period: "2限<br>10:40", mon: "", tue: "プログラミング", wed: "", thu: "物理学基礎", fri: "", sat: "キャリア" },
-            { period: "3限<br>13:00", mon: "離散数学", tue: "", wed: "ソフトウェア", thu: "", fri: "英語表現", sat: "" },
-            { period: "4限<br>14:40", mon: "", tue: "工学概論", wed: "", thu: "データベース", fri: "", sat: "" },
-            { period: "5限<br>16:20", mon: "PBL演習", tue: "", wed: "", thu: "", fri: "データ構造", sat: "" }
+        // 個人用時間割マップ (初期データ)
+        let timetableMap = [
+            { period: "1限", mon: "英語Ⅰ", tue: "", wed: "応用情報", thu: "", fri: "情報数理", sat: "" },
+            { period: "2限", mon: "", tue: "プログラミング", wed: "", thu: "物理学基礎", fri: "", sat: "キャリア" },
+            { period: "3限", mon: "離散数学", tue: "", wed: "ソフトウェア", thu: "", fri: "英語表現", sat: "" },
+            { period: "4限", mon: "", tue: "工学概論", wed: "", thu: "データベース", fri: "", sat: "" },
+            { period: "5限", mon: "PBL演習", tue: "", wed: "", thu: "", fri: "データ構造", sat: "" }
         ];
 
         let subjects = [
@@ -418,7 +456,8 @@
 
         function updateWeekDisplay() {
             const inputDateVal = document.getElementById("simulate-date").value;
-            const diffTime = new Date(inputDateVal) - BASE_DATE;
+            const currentDate = new Date(inputDateVal);
+            const diffTime = currentDate - BASE_DATE;
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             document.getElementById("week-display").innerText = diffDays < 0 ? "開講前" : "第 " + (Math.floor(diffDays / 7) + 1) + " 週目";
         }
@@ -449,15 +488,84 @@
             document.getElementById("main-dashboard").classList.remove("hidden");
 
             showAlert(`🎉 学籍番号 ${studentId} としてログインしました。`, "success");
+            buildSettingsTimetableEditor(); // 設定エディタ構築
             buildApplySubjectOptions();
             renderTimetable();
             switchPortal("student");
         }
 
+        // ⚙️ 時間割カスタム設定入力フォームの組み立て
+        function buildSettingsTimetableEditor() {
+            const tbody = document.getElementById("settings-timetable-tbody");
+            tbody.innerHTML = "";
+
+            timetableMap.forEach((row, i) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="p-2 border bg-slate-50 font-semibold text-slate-600">${row.period}</td>
+                    ${['mon','tue','wed','thu','fri','sat'].map(day => {
+                        return `
+                            <td class="p-1 border">
+                                <input type="text" data-row="${i}" data-day="${day}" value="${row[day]}" 
+                                       class="w-full p-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none text-center">
+                            </td>
+                        `;
+                    }).join('')}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // カスタマイズ時間割の保存と適用
+        function saveCustomTimetable() {
+            const inputs = document.querySelectorAll("#settings-timetable-tbody input");
+            
+            // 入力値をtimetableMapにマッピング
+            inputs.forEach(input => {
+                const rIndex = parseInt(input.dataset.row);
+                const day = input.dataset.day;
+                timetableMap[rIndex][day] = input.value.trim();
+            });
+
+            // 存在する全ユニーク科目を再集計してデータベースを拡張
+            let newSubjectsSet = new Set();
+            timetableMap.forEach(row => {
+                ['mon','tue','wed','thu','fri','sat'].forEach(day => {
+                    if (row[day]) newSubjectsSet.add(row[day]);
+                });
+            });
+
+            // 新しく追加された科目があれば attendance 配列を初期化
+            newSubjectsSet.forEach(sub => {
+                if (!subjects.includes(sub)) {
+                    subjects.push(sub);
+                    Object.keys(studentsList).forEach(studentId => {
+                        if (!globalAttendanceData[studentId][sub]) {
+                            globalAttendanceData[studentId][sub] = Array(13).fill("欠席");
+                        }
+                    });
+                }
+            });
+
+            showAlert("💾 独自の個人時間割設定を保存し、出席管理ページに反映しました。", "success");
+            buildApplySubjectOptions();
+            renderTimetable();
+            updateStudentView();
+        }
+
         function buildApplySubjectOptions() {
             const select = document.getElementById("apply-subject-select");
             select.innerHTML = "";
-            subjects.forEach(sub => {
+            
+            // 現在の時間割に設定されている科目のみ申請セレクトボックスに表示
+            let activeSubs = new Set();
+            timetableMap.forEach(row => {
+                ['mon','tue','wed','thu','fri','sat'].forEach(day => {
+                    if(row[day]) activeSubs.add(row[day]);
+                });
+            });
+
+            activeSubs.forEach(sub => {
                 const opt = document.createElement("option");
                 opt.value = sub;
                 opt.innerText = sub;
@@ -595,11 +703,9 @@
             renderNotifications();
         }
 
-        // 📂 教員用ステータスフィルター切り替え機能
         function setTeacherFilter(filterMode) {
             activeTeacherFilter = filterMode;
             
-            // ボタンのアクティブ状態のトグル
             const filterButtons = ["all", "temp", "present", "absent", "late", "fraud"];
             const modeMap = {
                 "all": "all",
@@ -681,7 +787,6 @@
             studentsList[authenticatedStudentId].touchLog[round] = now.toLocaleTimeString();
             globalAttendanceData[authenticatedStudentId][subject][round] = "仮出席";
 
-            // あなた宛のメールデータとして格納
             studentEmailsList.unshift({
                 id: Date.now(),
                 subjectName: subject,
@@ -698,15 +803,50 @@
             renderNotifications();
         }
 
+        // 🔔 改善: 救済申請はその日の授業のみ可能とするバリデーション
         function submitStudentApplication() {
             const subject = document.getElementById("apply-subject-select").value;
             const reason = document.getElementById("apply-reason").value.trim();
-            if (document.getElementById("student-auth-password").value.trim() !== studentsList[authenticatedStudentId].password || !reason) {
+            const passInput = document.getElementById("student-auth-password").value.trim();
+
+            if (passInput !== studentsList[authenticatedStudentId].password || !reason) {
                 showAlert("エラー: パスワードまたは理由が正しくありません。", "error");
                 return;
             }
+
+            // 現在のシミュレート日付を取得
+            const simDateVal = document.getElementById("simulate-date").value;
+            const simDate = new Date(simDateVal);
+            const simDayIndex = simDate.getDay(); // 0: 日, 1: 月, 2: 火, 3: 水, 4: 木, 5: 金, 6: 土
+            const dayMap = { 1: "mon", 2: "tue", 3: "wed", 4: "thu", 5: "fri", 6: "sat" };
+
+            // 選択された科目が現在のシミュレート曜日(当日)に予定されているかチェック
+            let scheduledOnSimDay = false;
+            let correctDayName = "";
+
+            timetableMap.forEach(row => {
+                ['mon','tue','wed','thu','fri','sat'].forEach((dayKey, idx) => {
+                    if (row[dayKey] === subject) {
+                        correctDayName = dayKey === "mon" ? "月曜日" : 
+                                         dayKey === "tue" ? "火曜日" : 
+                                         dayKey === "wed" ? "水曜日" : 
+                                         dayKey === "thu" ? "木曜日" : 
+                                         dayKey === "fri" ? "金曜日" : "土曜日";
+                        // 現在のシミュレート日と一致するか検証
+                        if (dayMap[simDayIndex] === dayKey) {
+                            scheduledOnSimDay = true;
+                        }
+                    }
+                });
+            });
+
+            if (!scheduledOnSimDay) {
+                showAlert(`提出エラー: 「${subject}」は${correctDayName}の講義です。救済申請は該当授業の当日（本日）のみしか提出できません。`, "error");
+                return;
+            }
+
             globalApplications.push({ id: globalApplications.length + 1, userId: authenticatedStudentId, userName: studentsList[authenticatedStudentId].name, subjectName: subject, reason: reason, status: "申請中" });
-            showAlert("📨 救済申請を送信しました。", "success");
+            showAlert(`📨 「${subject}」の救済申請を提出しました。`, "success");
             document.getElementById("apply-reason").value = "";
             document.getElementById("student-auth-password").value = "";
             loadTeacherApplications();
@@ -767,7 +907,6 @@
             const tbody = document.getElementById("teacher-control-tbody");
             tbody.innerHTML = "";
 
-            // 各種ステータスの集計用変数
             let counts = { all: 0, "仮出席": 0, "出席": 0, "欠席": 0, "遅刻": 0, "不正出席": 0 };
 
             Object.keys(studentsList).forEach(sid => {
@@ -779,9 +918,8 @@
                     counts[status]++;
                 }
 
-                // フィルター条件の検証
                 if (activeTeacherFilter !== "all" && status !== activeTeacherFilter) {
-                    return; // フィルターに合致しない場合は描画しない
+                    return; 
                 }
 
                 const log = sinfo.touchLog[round];
@@ -800,7 +938,6 @@
                 tbody.appendChild(tr);
             });
 
-            // 集計カウントをフィルターボタンにリアルタイム適用
             document.getElementById("count-all").innerText = counts.all;
             document.getElementById("count-temp").innerText = counts["仮出席"];
             document.getElementById("count-present").innerText = counts["出席"];
@@ -808,7 +945,6 @@
             document.getElementById("count-late").innerText = counts["遅刻"];
             document.getElementById("count-fraud").innerText = counts["不正出席"];
 
-            // 表示されるべき行がゼロの場合のメッセージ
             if (tbody.children.length === 0) {
                 const emptyTr = document.createElement("tr");
                 emptyTr.innerHTML = `<td colspan="4" class="p-6 text-center text-xs text-slate-400">該当するステータスの学生はいません。</td>`;
@@ -872,7 +1008,6 @@
             const personal = document.getElementById("personal-notifications");
             personal.innerHTML = "";
 
-            // あなた宛の疑似仮出席打刻メール通知を最上部に描画
             studentEmailsList.forEach(email => {
                 if (email.studentId === authenticatedStudentId) {
                     const mailDiv = document.createElement("div");
@@ -889,14 +1024,13 @@
                             <div>・打刻時刻: ${email.time}</div>
                         </div>
                         <p class="text-[10px] text-red-600 font-bold leading-relaxed">
-                            ⚠️ 授業終了時、教員の指定する「対面確認（紙出席票やミニテスト提出）」がない場合、本打刻があっても「不正出席」として全学生に警告通知されます。
+                            ⚠️ 授業終了時、教員の指定する「対面確認」がない場合、不正出席警告の対象となります。
                         </p>
                     `;
                     personal.appendChild(mailDiv);
                 }
             });
 
-            // 救済申請の履歴を描画
             globalApplications.filter(a => a.userId === authenticatedStudentId).forEach(app => {
                 const div = document.createElement("div");
                 div.className = `p-3 rounded-lg text-xs border ${app.status==='承認'?'bg-green-50 border-green-200':app.status==='却下'?'bg-red-50 border-red-200':'bg-amber-50 border-amber-200'}`;
