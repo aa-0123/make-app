@@ -256,7 +256,7 @@
                             <div>
                                 <label class="block font-bold text-indigo-900 mb-1">② 授業内対面確認ルール設定</label>
                                 <select id="custom-rule-select" onchange="applyCustomRule()" class="p-2 border rounded bg-white w-full font-semibold text-slate-700">
-                                    <option value="紙の出席票提出あり">紙の出席票と照合</option>
+                                    <option value="紙の出席票提出あり">紙 of 出席票と照合</option>
                                     <option value="授業内確認小テスト提出あり">確認小テストと照合</option>
                                     <option value="ミニッツペーパー回収あり">ミニッツペーパーと照合</option>
                                     <option value="独自対面呼名ルール">対面ロールコール（呼名）</option>
@@ -279,7 +279,6 @@
                             <h3 class="font-bold text-amber-950 text-sm">仮出席中の学生一覧 (打刻あり・出席未確定)</h3>
                         </div>
                         <div id="teacher-temp-attendance-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <!-- JSで現在「仮出席」になっている学生がまとめてここに表示されます -->
                         </div>
                     </div>
 
@@ -301,6 +300,7 @@
                                 </div>
                             </div>
 
+                            <!-- ⚡ 一括処理・お助けクイックアクションボタン -->
                             <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-lg space-y-3">
                                 <div class="text-xs text-indigo-900 font-bold flex items-center gap-1">
                                     <span>⚡</span> <span>教員サポート: 臨機応変一括処理・アシストボタン</span>
@@ -316,6 +316,17 @@
                                         ③ 全員をいったん【欠席】に戻す
                                     </button>
                                 </div>
+                            </div>
+
+                            <!-- 📂 改善：教員用出席状況フィルター機能 -->
+                            <div class="bg-slate-100 border border-slate-200 p-3 rounded-lg flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+                                <span>🔍 ステータス抽出フィルター:</span>
+                                <button id="filter-all" onclick="setTeacherFilter('all')" class="px-2.5 py-1 rounded bg-indigo-600 text-white shadow-sm transition">すべて (<span id="count-all">0</span>)</button>
+                                <button id="filter-temp" onclick="setTeacherFilter('仮出席')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition">仮出席 (<span id="count-temp">0</span>)</button>
+                                <button id="filter-present" onclick="setTeacherFilter('出席')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition">出席 (<span id="count-present">0</span>)</button>
+                                <button id="filter-absent" onclick="setTeacherFilter('欠席')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition">欠席 (<span id="count-absent">0</span>)</button>
+                                <button id="filter-late" onclick="setTeacherFilter('遅刻')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition">遅刻 (<span id="count-late">0</span>)</button>
+                                <button id="filter-fraud" onclick="setTeacherFilter('不正出席')" class="px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition">不正出席 (<span id="count-fraud">0</span>)</button>
                             </div>
 
                             <div class="overflow-x-auto bg-white rounded-lg border border-slate-200">
@@ -372,6 +383,7 @@
 
         let globalAttendanceData = {};
         let studentEmailsList = []; // 仮出席完了時に蓄積されるあなた宛て疑似メールデータ
+        let activeTeacherFilter = "all"; // 現在のアクティブな教員フィルター
 
         Object.keys(studentsList).forEach(studentId => {
             initStudentAttendance(studentId);
@@ -583,6 +595,33 @@
             renderNotifications();
         }
 
+        // 📂 教員用ステータスフィルター切り替え機能
+        function setTeacherFilter(filterMode) {
+            activeTeacherFilter = filterMode;
+            
+            // ボタンのアクティブ状態のトグル
+            const filterButtons = ["all", "temp", "present", "absent", "late", "fraud"];
+            const modeMap = {
+                "all": "all",
+                "temp": "仮出席",
+                "present": "出席",
+                "absent": "欠席",
+                "late": "遅刻",
+                "fraud": "不正出席"
+            };
+
+            filterButtons.forEach(btnId => {
+                const element = document.getElementById(`filter-${btnId}`);
+                if (modeMap[btnId] === filterMode || (btnId === "all" && filterMode === "all")) {
+                    element.className = "px-2.5 py-1 rounded bg-indigo-600 text-white shadow-sm transition";
+                } else {
+                    element.className = "px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition text-slate-700 border";
+                }
+            });
+
+            loadTeacherControlTable();
+        }
+
         function updateStudentView() {
             if (!authenticatedStudentId) return;
             subjects.forEach(subject => {
@@ -674,7 +713,7 @@
             renderNotifications(); 
         }
 
-        // 🔔 新設：教員用ポータルの仮出席者まとめレンダリング処理
+        // 教員用ポータルの仮出席者まとめレンダリング処理
         function renderTeacherTempAttendanceSummary() {
             const container = document.getElementById("teacher-temp-attendance-list");
             if (!container) return;
@@ -728,10 +767,24 @@
             const tbody = document.getElementById("teacher-control-tbody");
             tbody.innerHTML = "";
 
+            // 各種ステータスの集計用変数
+            let counts = { all: 0, "仮出席": 0, "出席": 0, "欠席": 0, "遅刻": 0, "不正出席": 0 };
+
             Object.keys(studentsList).forEach(sid => {
                 const sinfo = studentsList[sid];
-                const log = sinfo.touchLog[round];
                 const status = globalAttendanceData[sid][subject][round];
+                
+                counts.all++;
+                if (counts[status] !== undefined) {
+                    counts[status]++;
+                }
+
+                // フィルター条件の検証
+                if (activeTeacherFilter !== "all" && status !== activeTeacherFilter) {
+                    return; // フィルターに合致しない場合は描画しない
+                }
+
+                const log = sinfo.touchLog[round];
                 const tr = document.createElement("tr");
                 if (status === "仮出席") tr.className = "bg-amber-50/50";
                 tr.innerHTML = `
@@ -746,6 +799,21 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // 集計カウントをフィルターボタンにリアルタイム適用
+            document.getElementById("count-all").innerText = counts.all;
+            document.getElementById("count-temp").innerText = counts["仮出席"];
+            document.getElementById("count-present").innerText = counts["出席"];
+            document.getElementById("count-absent").innerText = counts["欠席"];
+            document.getElementById("count-late").innerText = counts["遅刻"];
+            document.getElementById("count-fraud").innerText = counts["不正出席"];
+
+            // 表示されるべき行がゼロの場合のメッセージ
+            if (tbody.children.length === 0) {
+                const emptyTr = document.createElement("tr");
+                emptyTr.innerHTML = `<td colspan="4" class="p-6 text-center text-xs text-slate-400">該当するステータスの学生はいません。</td>`;
+                tbody.appendChild(emptyTr);
+            }
         }
 
         function saveTeacherOverride() {
