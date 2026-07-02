@@ -120,7 +120,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
-                    <!-- 学生不携帯救済申請 (疑似打刻シミュレーターは廃止、申請に統一) -->
+                    <!-- 学生不携帯救済申請 -->
                     <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
                         <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2 mb-3">
                             <span class="text-lg">📝</span> タッチ忘れ・学生証不携帯の申請
@@ -253,7 +253,7 @@
                     </div>
                 </div>
 
-                <!-- 🔔 新設：時間割の下の連絡事項エリア (左：個人宛 / 右：全体) -->
+                <!-- 🔔 時間割の下の連絡事項エリア (左：個人宛 / 右：全体) -->
                 <div class="border-t border-slate-100 pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     
                     <!-- 左側：個人宛の連絡事項 -->
@@ -285,14 +285,27 @@
             <!-- 👨‍🏫 教員用ポータル画面 -->
             <!-- ======================================================= -->
             <div id="portal-teacher" class="hidden fade-in space-y-6">
-                <!-- 教員確認用のセキュリティパスワード入力 -->
-                <div id="teacher-lock-screen" class="p-6 bg-slate-50 border border-slate-200 rounded-xl text-center max-w-md mx-auto my-8">
-                    <span class="text-3xl">🔑</span>
-                    <h3 class="font-bold text-slate-800 mt-2">教員認証</h3>
-                    <p class="text-xs text-slate-500 mt-1 mb-4">管理操作を行うため、現在のユーザーパスワード（学期登録時のパスワード）を入力してください。</p>
-                    <div class="space-y-3">
-                        <input type="password" id="teacher-auth-password" placeholder="パスワードを入力" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        <button onclick="unlockTeacherPortal()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg transition">認証する</button>
+                <!-- 🔐 教員確認用のセキュリティ認証画面（教員番号とパスワード入力） -->
+                <div id="teacher-lock-screen" class="p-6 bg-slate-50 border border-slate-200 rounded-xl max-w-md mx-auto my-8 text-left">
+                    <div class="text-center mb-6">
+                        <span class="text-3xl">🔐</span>
+                        <h3 class="font-bold text-slate-800 mt-2 text-lg">教員（管理者）認証</h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            管理操作を行うため、教員番号（教員個人ID）と、学期登録時に設定したパスワードを入力してください。
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">教員番号（教員個人ID）</label>
+                            <input type="text" id="teacher-id-input" placeholder="例: T01 (任意の英数字)" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">ログイン用パスワード</label>
+                            <input type="password" id="teacher-auth-password" placeholder="登録済みのパスワードを入力" class="w-full p-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+                        <button onclick="unlockTeacherPortal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-lg transition">
+                            教員認証を行う
+                        </button>
                     </div>
                 </div>
 
@@ -308,7 +321,7 @@
                             </p>
                         </div>
                         <div class="bg-amber-100 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                            未処理の救済申請: <span id="teacher-application-count" class="text-red-600 font-bold">0</span> 件
+                            未処理 of 救済申請: <span id="teacher-application-count" class="text-red-600 font-bold">0</span> 件
                         </div>
                     </div>
 
@@ -374,7 +387,7 @@
                             <h3 class="font-bold text-slate-800 text-sm mb-1 flex items-center gap-1.5">
                                 <span>📥</span> 届いた救済申請（不携帯等の照合）
                             </h3>
-                            <p class="text-xs text-slate-500 mb-4">紙の出席票等で確認が取れたら承認を押してください。</p>
+                            <p class="text-xs text-slate-500 mb-4">紙 of 出席票等で確認が取れたら承認を押してください。</p>
                             
                             <div id="application-list-container" class="space-y-3 max-h-[400px] overflow-y-auto flex-1">
                                 <!-- 届いた申請がここに表示されます -->
@@ -552,13 +565,20 @@
                 document.getElementById("teacher-lock-screen").classList.remove("hidden");
                 document.getElementById("teacher-unlocked-content").classList.add("hidden");
                 document.getElementById("teacher-auth-password").value = "";
+                document.getElementById("teacher-id-input").value = "";
             }
         }
 
         // --- D. 教員ポータルセキュリティロック解除 ---
         function unlockTeacherPortal() {
+            const inputId = document.getElementById("teacher-id-input").value.trim();
             const inputPass = document.getElementById("teacher-auth-password").value.trim();
             const correctPass = studentsList[authenticatedStudentId].password;
+
+            if (!inputId) {
+                showAlert("エラー: 教員番号を入力してください。", "error");
+                return;
+            }
 
             if (!inputPass) {
                 showAlert("エラー: 認証用パスワードを入力してください。", "error");
@@ -574,7 +594,7 @@
             document.getElementById("teacher-lock-screen").classList.add("hidden");
             document.getElementById("teacher-unlocked-content").classList.remove("hidden");
             
-            showAlert("🔓 教員ポータルのロックを解除しました。一括出席更新が可能です。", "success");
+            showAlert(`🔓 教員ポータルのロックを解除しました。教員番号: ${inputId} として認証されました。`, "success");
             loadTeacherControlTable();
             loadTeacherApplications();
         }
@@ -656,7 +676,7 @@
             document.getElementById("student-summary-count").innerText = attendCount;
         }
 
-        // 学生：救済申請の提出 (疑似打刻シミュレータを廃止したため、出席申告はこちらに一元化)
+        // 学生：救済申請の提出
         function submitStudentApplication() {
             const subject = document.getElementById("apply-subject-select").value;
             const reason = document.getElementById("apply-reason").value.trim();
@@ -817,7 +837,7 @@
         }
 
 
-        // --- G. 新設：連絡事項のレンダリング処理（個人宛・全体） ---
+        // --- G. 連絡事項のレンダリング処理（個人宛・全体） ---
         function renderNotifications() {
             if (!authenticatedStudentId) return;
 
