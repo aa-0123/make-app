@@ -126,7 +126,10 @@
                             <span class="flex items-center gap-2">
                                 <span class="text-lg">⚙️</span> 個人時間割のカスタム設定 (あなたの時間割を編集)
                             </span>
-                            <span class="transition group-open:rotate-180 text-xs text-slate-400">▼ クリックして開閉</span>
+                            <span class="text-xs text-slate-400 flex items-center gap-1">
+                                <span>クリックして開閉</span>
+                                <span class="transition-transform duration-200 inline-block group-open:rotate-180">▼</span>
+                            </span>
                         </summary>
                         <div class="mt-4 space-y-4 pt-4 border-t border-slate-200 text-xs">
                             <p class="text-slate-500 mb-2">自身が履修している講義名を設定してください。空欄にした場合は「-」として表示されます。</p>
@@ -1051,7 +1054,7 @@
             document.querySelectorAll("#teacher-control-tbody select").forEach(sel => {
                 globalAttendanceData[sel.dataset.student][subject][round] = sel.value;
             });
-            showAlert(`💾 出席判定を上書き一括確定しました。`, "success");
+            showAlert("💾 出席判定を上書き一括確定しました。", "success");
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
             renderNotifications(); 
