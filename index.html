@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スマート出席管理システム</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f8fafc;
         }
         .fade-in {
             animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -19,10 +23,9 @@
         }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 antialiased">
+<body class="min-h-screen text-slate-800 dark:text-slate-200 antialiased bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
 
-    <!-- 1. アプリケーションヘッダー -->
-    <header class="bg-indigo-950 text-white shadow-sm border-b border-indigo-900 sticky top-0 z-30">
+    <header class="bg-indigo-950 dark:bg-slate-950 text-white shadow-sm border-b border-indigo-900 dark:border-slate-800 sticky top-0 z-30">
         <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-indigo-600/30 p-2 rounded-lg border border-indigo-500/20">
@@ -30,64 +33,65 @@
                 </div>
                 <div>
                     <h1 class="text-base font-bold tracking-tight">スマート出席管理</h1>
-                    <p class="text-[10px] text-indigo-300">PBL演習② セキュリティ・構成プロトタイプ</p>
+                    <p class="text-[10px] text-indigo-300 dark:text-slate-400">PBL演習② セキュリティ・構成プロトタイプ</p>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-2 bg-indigo-900/60 px-3 py-1.5 rounded-lg border border-indigo-800 text-xs">
-                <span class="text-slate-300 font-medium">基準日: 2026/04/13 (月)</span>
-                <span class="text-indigo-700">|</span>
-                <label for="simulate-date" class="font-medium text-slate-300">シミュレーション日:</label>
-                <input type="date" id="simulate-date" value="2026-06-25" onchange="updateWeekDisplay()" class="bg-indigo-950 text-white px-2 py-0.5 rounded border border-indigo-700 focus:outline-none focus:border-indigo-400 font-mono text-xs">
-                <span id="week-display" class="bg-amber-500 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
+            <div class="flex items-center space-x-3 flex-wrap gap-2 text-xs">
+                <button onclick="toggleDarkMode()" class="bg-indigo-900/60 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-indigo-800 dark:border-slate-700 text-slate-200 font-bold flex items-center gap-1.5 hover:bg-indigo-800 transition">
+                    <span id="dark-mode-icon">🌙</span> <span id="dark-mode-text">ダークモード</span>
+                </button>
+
+                <div class="flex items-center space-x-2 bg-indigo-900/60 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-indigo-800 dark:border-slate-700">
+                    <span class="text-slate-300 font-medium">基準日: 2026/04/13 (月)</span>
+                    <span class="text-indigo-700 dark:text-slate-600">|</span>
+                    <label for="simulate-date" class="font-medium text-slate-300">シミュレーション日:</label>
+                    <input type="date" id="simulate-date" value="2026-06-25" onchange="updateWeekDisplay()" class="bg-indigo-950 dark:bg-slate-900 text-white px-2 py-0.5 rounded border border-indigo-700 dark:border-slate-600 focus:outline-none focus:border-indigo-400 font-mono text-xs">
+                    <span id="week-display" class="bg-amber-500 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- 2. モード切り替えタブ -->
     <div id="portal-tabs" class="hidden max-w-6xl mx-auto px-4 mt-6">
-        <div class="flex bg-white p-1 rounded-xl shadow-sm border border-slate-200">
-            <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 bg-indigo-50 flex justify-center items-center gap-1.5">
+        <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+            <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5">
                 <span>👤</span> 学生用ポータル
             </button>
-            <button id="tab-teacher" onclick="switchPortal('teacher')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex justify-center items-center gap-1.5">
+            <button id="tab-teacher" onclick="switchPortal('teacher')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5">
                 <span>👨‍🏫</span> 教員用管理ポータル
             </button>
         </div>
     </div>
 
-    <!-- 3. メインコンテンツ -->
     <main class="max-w-6xl mx-auto px-4 pb-12 mt-6">
         
-        <!-- アラート通知バナー -->
         <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl shadow-sm font-semibold flex justify-between items-center transition-all duration-300">
             <span id="alert-text" class="text-xs"></span>
             <button onclick="closeAlert()" class="text-base font-bold opacity-60 hover:opacity-100 transition">&times;</button>
         </div>
 
-        <!-- カスタム確認ダイアログ (モーダル) -->
         <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-            <div class="bg-white rounded-xl shadow-xl max-w-sm w-full border border-slate-150 p-5 space-y-4">
-                <div class="flex items-center gap-2 text-indigo-950">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full border border-slate-150 dark:border-slate-700 p-5 space-y-4">
+                <div class="flex items-center gap-2 text-indigo-950 dark:text-white">
                     <span class="text-lg">⚠️</span>
                     <h3 class="font-bold text-sm">操作のご確認</h3>
                 </div>
-                <p id="confirm-modal-text" class="text-xs text-slate-600 leading-relaxed"></p>
+                <p id="confirm-modal-text" class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed"></p>
                 <div class="flex justify-end space-x-2 pt-2 text-xs">
-                    <button id="confirm-no-btn" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition">いいえ</button>
+                    <button id="confirm-no-btn" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition">いいえ</button>
                     <button id="confirm-yes-btn" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition">はい</button>
                 </div>
             </div>
         </div>
 
-        <!-- 🔑 認証・登録画面 -->
-        <div id="auth-screen" class="max-w-md mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200 fade-in my-8">
+        <div id="auth-screen" class="max-w-md mx-auto bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 fade-in my-8">
             <div class="text-center mb-6">
-                <div class="bg-indigo-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100">
+                <div class="bg-indigo-50 dark:bg-indigo-950/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100 dark:border-indigo-900">
                     <span class="text-2xl">🔐</span>
                 </div>
-                <h2 class="text-xl font-bold text-slate-800">ポータル登録とサインイン</h2>
-                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white">ポータル登録とサインイン</h2>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
                     学籍番号と、学生証の左下番号を入力してください。<br>
                     本人確認のためのセキュリティ・パスワードをその場で設定します。
                 </p>
@@ -95,16 +99,16 @@
 
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-bold text-slate-600 mb-1">学籍番号</label>
-                    <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white transition">
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学籍番号</label>
+                    <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-600 mb-1">学生証の左下番号</label>
-                    <input type="text" id="auth-card-number" placeholder="任意の数字を入力" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white transition">
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学生証の左下番号</label>
+                    <input type="text" id="auth-card-number" placeholder="任意の数字を入力" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-600 mb-1">ログイン用パスワードの設定</label>
-                    <input type="password" id="auth-password" placeholder="任意のパスワードを設定" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white transition">
+                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">ログイン用パスワードの設定</label>
+                    <input type="password" id="auth-password" placeholder="任意のパスワードを設定" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
                 </div>
                 <button onclick="registerAndAuthenticate()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
                     登録してダッシュボードを開く
@@ -112,22 +116,19 @@
             </div>
         </div>
 
-        <!-- 🔓 メインダッシュボード -->
-        <div id="main-dashboard" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+        <div id="main-dashboard" class="hidden bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
 
-            <!-- 👤 学生ポータル -->
             <div id="portal-student" class="fade-in space-y-6">
-                <div class="bg-indigo-50/50 border border-indigo-100 p-3.5 rounded-xl flex items-start gap-2.5">
+                <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-3.5 rounded-xl flex items-start gap-2.5">
                     <span class="text-sm mt-0.5">💡</span>
-                    <div class="text-xs text-indigo-950 leading-relaxed">
+                    <div class="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
                         授業の打刻を行うには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
                     </div>
                 </div>
 
-                <!-- ⚙️ 個人時間割の編集 -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                     <details class="group">
-                        <summary class="list-none flex justify-between items-center font-bold text-slate-700 cursor-pointer select-none">
+                        <summary class="list-none flex justify-between items-center font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                             <span class="flex items-center gap-1.5">
                                 <span>⚙️</span> 個人履修時間割のカスタマイズ
                             </span>
@@ -136,19 +137,19 @@
                                 <span class="transition-transform duration-200 inline-block group-open:rotate-180">▼</span>
                             </span>
                         </summary>
-                        <div class="mt-3 space-y-3 pt-3 border-t border-slate-200">
-                            <p class="text-slate-500">ご自身が履修している科目の時間割を入力してください。空欄にした場所は「-」として表示されます。</p>
+                        <div class="mt-3 space-y-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                            <p class="text-slate-500 dark:text-slate-400">ご自身が履修している科目の時間割を入力してください。空欄にした場所は「-」として表示されます。</p>
                             <div class="overflow-x-auto">
-                                <table class="w-full border text-center border-slate-200 bg-white">
+                                <table class="w-full border text-center border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                                     <thead>
-                                        <tr class="bg-slate-50 text-slate-600 font-semibold">
-                                            <th class="p-2 border">時限</th>
-                                            <th class="p-2 border">月</th>
-                                            <th class="p-2 border">火</th>
-                                            <th class="p-2 border">水</th>
-                                            <th class="p-2 border">木</th>
-                                            <th class="p-2 border">金</th>
-                                            <th class="p-2 border">土</th>
+                                        <tr class="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-semibold">
+                                            <th class="p-2 border dark:border-slate-700">時限</th>
+                                            <th class="p-2 border dark:border-slate-700">月</th>
+                                            <th class="p-2 border dark:border-slate-700">火</th>
+                                            <th class="p-2 border dark:border-slate-700">水</th>
+                                            <th class="p-2 border dark:border-slate-700">木</th>
+                                            <th class="p-2 border dark:border-slate-700">金</th>
+                                            <th class="p-2 border dark:border-slate-700">土</th>
                                         </tr>
                                     </thead>
                                     <tbody id="settings-timetable-tbody">
@@ -162,78 +163,74 @@
                     </details>
                 </div>
 
-                <!-- 不携帯救済申請 -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-3">
-                    <h3 class="font-bold text-slate-700 flex items-center gap-1.5">
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-3">
+                    <h3 class="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                         <span>📝</span> 学生証不携帯・打刻忘れの救済申請 (※ 授業当日のみ申請可能)
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">申請者</label>
-                            <input type="text" id="apply-student-display-name" disabled class="w-full p-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 font-bold">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">申請者</label>
+                            <input type="text" id="apply-student-display-name" disabled class="w-full p-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-500 dark:text-slate-400 font-bold">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">申請対象の講義</label>
-                            <select id="apply-subject-select" class="w-full p-2 bg-white border border-slate-250 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">申請対象の講義</label>
+                            <select id="apply-subject-select" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs">
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 mb-1">本人確認用パスワード</label>
-                            <input type="password" id="student-auth-password" placeholder="サインインパスワード" class="w-full p-2 bg-white border border-slate-250 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">本人確認用パスワード</label>
+                            <input type="password" id="student-auth-password" placeholder="サインインパスワード" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 mb-1">具体的な不携帯・打刻忘れ理由</label>
-                        <textarea id="apply-reason" rows="2" placeholder="（例）自宅にカードケースを忘れてしまったため。授業最後に紙の出席カードを提出済です。" class="w-full p-2 bg-white border border-slate-250 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none"></textarea>
+                        <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">具体的な不携帯・打刻忘れ理由</label>
+                        <textarea id="apply-reason" rows="2" placeholder="（例）自宅にカードケースを忘れてしまったため。授業最後に紙の出席カードを提出済です。" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"></textarea>
                     </div>
                     <button onclick="submitStudentApplication()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition">
                         出席救済申請を教員へ提出する
                     </button>
                 </div>
 
-                <!-- 時間割＆打刻ボード -->
-                <div class="border-t border-slate-100 pt-5 space-y-3">
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-5 space-y-3">
                     <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-base text-slate-800 flex items-center gap-1.5">
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-1.5">
                             <span>📅</span> 履修時間割と出席進捗
                         </h3>
-                        <div class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold">
+                        <div class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full font-bold">
                             ユーザー: <span id="student-viewing-label">S01</span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                        <!-- 時間割 -->
                         <div class="lg:col-span-2 overflow-x-auto">
-                            <table class="w-full border-collapse border border-slate-200 rounded-xl overflow-hidden text-xs">
+                            <table class="w-full border-collapse border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden text-xs">
                                 <thead>
-                                    <tr class="bg-slate-100 text-slate-600">
-                                        <th class="border border-slate-200 p-2.5 w-14">時限</th>
-                                        <th class="border border-slate-200 p-2.5">月</th>
-                                        <th class="border border-slate-200 p-2.5">火</th>
-                                        <th class="border border-slate-200 p-2.5">水</th>
-                                        <th class="border border-slate-200 p-2.5">木</th>
-                                        <th class="border border-slate-200 p-2.5">金</th>
-                                        <th class="border border-slate-200 p-2.5">土</th>
+                                    <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400">
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5 w-14">時限</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">月</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">火</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">水</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">木</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">金</th>
+                                        <th class="border border-slate-200 dark:border-slate-700 p-2.5">土</th>
                                     </tr>
                                 </thead>
-                                <tbody id="timetable-tbody" class="bg-white">
+                                <tbody id="timetable-tbody" class="bg-white dark:bg-slate-800">
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- 打刻・詳細パネル -->
-                        <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl flex flex-col justify-between min-h-[380px] text-xs">
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-col justify-between min-h-[380px] text-xs">
                             <div class="space-y-4">
-                                <h4 id="student-panel-title" class="font-bold text-slate-800 border-b border-slate-200 pb-2 flex items-center gap-1">💡 授業を選択してください</h4>
+                                <h4 id="student-panel-title" class="font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-1">💡 授業を選択してください</h4>
                                 
-                                <div id="student-card-touch-area" class="hidden p-3 bg-white border border-indigo-100 rounded-lg shadow-sm space-y-2">
-                                    <div class="text-[11px] font-bold text-indigo-950 flex items-center gap-1">
+                                <div id="student-card-touch-area" class="hidden p-3 bg-white dark:bg-slate-800 border border-indigo-100 dark:border-indigo-950 rounded-lg shadow-sm space-y-2">
+                                    <div class="text-[11px] font-bold text-indigo-950 dark:text-indigo-300 flex items-center gap-1">
                                         <span>💳</span> 学生証のカードタッチ（擬似打刻）
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="text" id="panel-card-number" placeholder="学生証左下番号" class="p-1.5 bg-slate-50 border rounded text-xs focus:outline-none focus:border-indigo-500">
-                                        <input type="password" id="panel-password" placeholder="パスワード" class="p-1.5 bg-slate-50 border rounded text-xs focus:outline-none focus:border-indigo-500">
+                                        <input type="text" id="panel-card-number" placeholder="学生証左下番号" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
+                                        <input type="password" id="panel-password" placeholder="パスワード" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
                                     </div>
                                     <button onclick="executeStudentTouchFromPanel()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] transition">
                                         学生証をタッチする
@@ -243,48 +240,45 @@
                                 <div id="student-attendance-grid" class="grid grid-cols-2 gap-1.5 max-h-64 overflow-y-auto"></div>
                             </div>
 
-                            <div id="student-attendance-summary" class="hidden text-center py-2 bg-white border border-slate-200 rounded-lg font-bold text-xs text-indigo-950 mt-3 shadow-sm">
-                                出席確定数: <span id="student-summary-count" class="text-sm text-indigo-600">0</span> / 20 回
+                            <div id="student-attendance-summary" class="hidden text-center py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-bold text-xs text-indigo-950 dark:text-indigo-300 mt-3 shadow-sm">
+                                出席確定数: <span id="student-summary-count" class="text-sm text-indigo-600 dark:text-indigo-400">0</span> / 20 回
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- お知らせ・通知履歴エリア -->
-                <div class="border-t border-slate-100 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2.5">
-                        <div class="flex items-center gap-1.5 border-b border-slate-100 pb-2 text-xs font-bold text-slate-700">
-                            <span>📨</span><h3>個人宛通知・自動配信メール控え</h3>
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-2.5">
+                        <div class="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-700 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                            <span>📨</span><h3>個人宛通知・自動配信メール履歴</h3>
                         </div>
-                        <div id="personal-notifications" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
+                        <div id="personal-notifications" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
                     </div>
 
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2.5">
-                        <div class="flex items-center gap-1.5 border-b border-slate-100 pb-2 text-xs font-bold text-slate-700">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-2.5">
+                        <div class="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-700 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
                             <span>📢</span><h3>学内全体掲示・不正打刻警告</h3>
                         </div>
-                        <div id="global-notifications" class="space-y-2.5 max-h-[300px] overflow-y-auto"></div>
+                        <div id="global-notifications" class="space-y-2.5 max-h-[350px] overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 👨‍🏫 教員用ポータル -->
             <div id="portal-teacher" class="hidden fade-in space-y-6">
-                <!-- パスコードロック -->
-                <div id="teacher-lock-screen" class="p-6 bg-slate-50 border border-slate-200 rounded-xl max-w-sm mx-auto my-6 text-xs">
+                <div id="teacher-lock-screen" class="p-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl max-w-sm mx-auto my-6 text-xs">
                     <div class="text-center mb-4">
                         <span class="text-2xl">🔐</span>
-                        <h3 class="font-bold text-slate-800 mt-2 text-sm">教員（管理者）認証</h3>
-                        <p class="text-[11px] text-slate-500 mt-1">ポータル登録時に設定したパスワードを入力してください。</p>
+                        <h3 class="font-bold text-slate-800 dark:text-white mt-2 text-sm">教員（管理者）認証</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">ポータル登録時に設定したパスワードを入力してください。</p>
                     </div>
                     <div class="space-y-3">
                         <div>
-                            <label class="block font-bold text-slate-600 mb-1">教員番号</label>
-                            <input type="text" id="teacher-id-input" placeholder="例: T01" class="w-full p-2 bg-white border border-slate-250 rounded-lg">
+                            <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">教員番号</label>
+                            <input type="text" id="teacher-id-input" placeholder="例: T01" class="w-full p-2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border dark:border-slate-700 rounded-lg">
                         </div>
                         <div>
-                            <label class="block font-bold text-slate-600 mb-1">パスワード</label>
-                            <input type="password" id="teacher-auth-password" placeholder="パスワードを入力" class="w-full p-2 bg-white border border-slate-250 rounded-lg">
+                            <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">パスワード</label>
+                            <input type="password" id="teacher-auth-password" placeholder="パスワードを入力" class="w-full p-2 bg-white dark:bg-slate-800 text-slate-800 dark:text-white border dark:border-slate-700 rounded-lg">
                         </div>
                         <button onclick="unlockTeacherPortal()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition">
                             サインイン
@@ -292,33 +286,31 @@
                     </div>
                 </div>
 
-                <!-- アンロックコンテンツ -->
                 <div id="teacher-unlocked-content" class="hidden space-y-5">
                     
-                    <!-- 臨機応変カスタマイズ & ルール -->
-                    <div class="bg-indigo-50/40 border border-indigo-100 p-4 rounded-xl space-y-3 text-xs">
-                        <div class="flex items-center gap-1.5 border-b border-indigo-100 pb-2">
+                    <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-4 rounded-xl space-y-3 text-xs">
+                        <div class="flex items-center gap-1.5 border-b border-indigo-100 dark:border-indigo-900 pb-2">
                             <span class="text-base">🛠️</span>
-                            <h2 class="font-bold text-indigo-950">授業設定と出席突き合わせルール</h2>
+                            <h2 class="font-bold text-indigo-950 dark:text-indigo-300">授業設定と出席突き合わせルール</h2>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                                <label class="block font-bold text-indigo-900 mb-1">新規開講科目の追加</label>
+                                <label class="block font-bold text-indigo-900 dark:text-indigo-400 mb-1">新規開講科目の追加</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="custom-subject-input" placeholder="例：情報ネットワーク" class="p-2 border rounded bg-white w-full">
+                                    <input type="text" id="custom-subject-input" placeholder="例：情報ネットワーク" class="p-2 border dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-white w-full">
                                     <button onclick="addNewSubject()" class="px-3 bg-indigo-600 text-white font-bold rounded hover:bg-indigo-700 transition">追加</button>
                                 </div>
                             </div>
                             <div>
-                                <label class="block font-bold text-indigo-900 mb-1">出席突き合わせ基準</label>
-                                <select id="custom-rule-select" onchange="applyCustomRule()" class="p-2 border rounded bg-white w-full font-semibold text-slate-700">
-                                    <option value="紙の出席票提出あり">紙の出席カードと照合</option>
+                                <label class="block font-bold text-indigo-900 dark:text-indigo-400 mb-1">出席突き合わせ基準</label>
+                                <select id="custom-rule-select" onchange="applyCustomRule()" class="p-2 border dark:border-slate-700 rounded bg-white dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300 w-full">
+                                    <option value="紙の出席票提出あり">紙 of 出席カードと照合</option>
                                     <option value="授業内確認小テスト提出あり">確認小テストと照合</option>
                                     <option value="ミニッツペーパー回収あり">ミニッツペーパーと照合</option>
                                     <option value="独自対面呼名ルール">対面ロールコール（呼名）</option>
                                 </select>
                             </div>
-                            <div class="bg-indigo-950 text-indigo-100 p-3 rounded-lg flex flex-col justify-center">
+                            <div class="bg-indigo-950 dark:bg-slate-900 text-indigo-100 dark:text-slate-300 p-3 rounded-lg flex flex-col justify-center border dark:border-slate-800">
                                 <div class="font-bold text-[10px] text-amber-400">現在の設定</div>
                                 <div class="mt-0.5 font-mono text-[10px] space-y-0.5">
                                     <div>講義科目: <span id="current-custom-subject-label" class="text-white font-bold">ソフトウェア</span></div>
@@ -328,42 +320,74 @@
                         </div>
                     </div>
 
-                    <!-- 個別学生カルテ -->
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3.5">
-                        <div class="flex items-center justify-between border-b pb-2">
+                    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-3.5">
+                        <div class="flex items-center gap-1.5 border-b dark:border-slate-700 pb-2 text-xs font-bold text-slate-800 dark:text-white">
+                            <span>✉️</span> <h3>個別メッセージ・警告メール送信機能 (学生ポータル連動)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                            <div class="space-y-2">
+                                <label class="block font-bold text-slate-600 dark:text-slate-400">1. 送信先学生</label>
+                                <select id="teacher-mail-student-select" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-semibold"></select>
+                                
+                                <label class="block font-bold text-slate-600 dark:text-slate-400 pt-1">2. テンプレート呼び出し</label>
+                                <div class="grid grid-cols-1 gap-1">
+                                    <button onclick="applyMailTemplate('warning')" class="py-1 px-2 text-left bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 rounded border border-red-200 dark:border-red-900 font-bold text-[11px]">⚠️ 出席率低下の警告</button>
+                                    <button onclick="applyMailTemplate('fraud')" class="py-1 px-2 text-left bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-700 dark:text-orange-400 rounded border border-orange-200 dark:border-orange-900 font-bold text-[11px]">🚨 不正打刻の疑い通達</button>
+                                    <button onclick="applyMailTemplate('interview')" class="py-1 px-2 text-left bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-900 font-bold text-[11px]">💬 個別面談の呼び出し</button>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 space-y-2.5">
+                                <div>
+                                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">メール件名</label>
+                                    <input type="text" id="teacher-mail-title" placeholder="件名を入力してください" class="w-full p-2 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">メール本文</label>
+                                    <textarea id="teacher-mail-body" rows="4" placeholder="学生へ送信する具体的なメッセージテキストを入力" class="w-full p-2 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded-lg font-mono text-[11px] leading-relaxed"></textarea>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button onclick="sendTeacherCustomMail()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
+                                        個人通知メールを送信する
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-3.5">
+                        <div class="flex items-center justify-between border-b dark:border-slate-700 pb-2">
                             <div class="flex items-center gap-2">
                                 <span class="text-lg">👤</span>
-                                <h3 class="font-bold text-slate-800 text-sm">個別学生カルテ (状況の詳細照会)</h3>
+                                <h3 class="font-bold text-slate-800 dark:text-white text-sm">個別学生カルテ (状況の詳細照会)</h3>
                             </div>
                             <span class="text-[10px] text-slate-400">学籍番号または名前から選択し、科目毎の全20回の進捗を一覧表示します。</span>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="space-y-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                            <div class="space-y-3.5 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                                 <div>
-                                    <label class="block font-bold text-slate-600 mb-1.5">学生を選択</label>
-                                    <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2 bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1.5">学生を選択</label>
+                                    <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg w-full font-semibold text-slate-700 dark:text-slate-300 focus:outline-none text-xs">
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block font-bold text-slate-600 mb-1.5">表示科目</label>
-                                    <select id="teacher-detail-subject-select" onchange="renderStudentDetailCard()" class="p-2 bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                    <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1.5">表示科目</label>
+                                    <select id="teacher-detail-subject-select" onchange="renderStudentDetailCard()" class="p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg w-full font-semibold text-slate-700 dark:text-slate-300 focus:outline-none text-xs">
                                     </select>
                                 </div>
-                                <div class="text-[10px] text-slate-500 leading-relaxed bg-white border p-3 rounded-lg">
+                                <div class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed bg-white dark:bg-slate-800 border dark:border-slate-700 p-3 rounded-lg">
                                     💡 <strong>カルテの見方:</strong><br>
                                     学生と科目を設定すると、トータルの出席内訳が算出され、警告状態や20回分の打刻ステータスが出力されます。
                                 </div>
                             </div>
-                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-center">
+                            <div class="md:col-span-2 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-center">
                                 <div id="student-detail-card-content" class="space-y-3">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 仮出席中（打刻済み・出席未確定）リスト -->
-                    <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 shadow-sm text-xs">
-                        <div class="flex items-center gap-1.5 mb-2.5 border-b border-amber-200 pb-2 text-amber-950 font-bold">
+                    <div class="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-xl p-4 shadow-sm text-xs">
+                        <div class="flex items-center gap-1.5 mb-2.5 border-b border-amber-200 dark:border-amber-900 pb-2 text-amber-950 dark:text-amber-300 font-bold">
                             <span class="text-base">⚠️</span>
                             <h3>仮出席中の学生 (学生打刻あり、教員側未確定)</h3>
                         </div>
@@ -371,21 +395,19 @@
                         </div>
                     </div>
 
-                    <!-- メイン操作テーブルと申請管理 -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
-                        <div class="lg:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3.5">
+                        <div class="lg:col-span-2 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3.5">
                             <div class="flex justify-between items-center flex-wrap gap-2">
-                                <h3 class="font-bold text-slate-800 text-xs">🔄 出席手動修正・管理テーブル (全20回)</h3>
+                                <h3 class="font-bold text-slate-800 dark:text-white text-xs">🔄 出席手動修正・管理テーブル (全20回)</h3>
                                 <div class="flex gap-2">
-                                    <select id="teacher-subject-select" onchange="loadTeacherControlTable(); renderStudentDetailCard();" class="p-1.5 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700"></select>
-                                    <select id="teacher-lecture-round" onchange="loadTeacherControlTable()" class="p-1.5 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700">
+                                    <select id="teacher-subject-select" onchange="loadTeacherControlTable(); renderStudentDetailCard();" class="p-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-semibold text-slate-700 dark:text-slate-300"></select>
+                                    <select id="teacher-lecture-round" onchange="loadTeacherControlTable()" class="p-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-semibold text-slate-700 dark:text-slate-300">
                                     </select>
                                 </div>
                             </div>
 
-                            <!-- 一括お助けクイックアクション -->
-                            <div class="bg-indigo-50/80 border border-indigo-100 p-3 rounded-lg space-y-2.5">
-                                <div class="text-[11px] text-indigo-950 font-bold flex items-center gap-1">
+                            <div class="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 p-3 rounded-lg space-y-2.5">
+                                <div class="text-[11px] text-indigo-950 dark:text-indigo-300 font-bold flex items-center gap-1">
                                     <span>⚡</span> 一括操作アシスト
                                 </div>
                                 <div class="flex flex-wrap gap-1.5 text-[10px]">
@@ -404,14 +426,13 @@
                                 </div>
                             </div>
 
-                            <!-- 単発手動更新 -->
-                            <div class="bg-indigo-50/85 border border-indigo-100 p-3 rounded-lg space-y-2">
-                                <div class="text-[11px] text-indigo-950 font-bold flex items-center gap-1">
+                            <div class="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 p-3 rounded-lg space-y-2">
+                                <div class="text-[11px] text-indigo-950 dark:text-indigo-300 font-bold flex items-center gap-1">
                                     <span>👤</span> 個別出席ステータスの直接書き換え
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <input type="text" id="manual-student-id" placeholder="学籍番号を入力 (例: S01)" class="p-2 border border-slate-300 rounded bg-white w-full">
-                                    <select id="manual-student-status" class="p-2 border border-slate-300 rounded bg-white w-full font-semibold text-slate-700">
+                                    <input type="text" id="manual-student-id" placeholder="学籍番号を入力 (例: S01)" class="p-2 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-white w-full">
+                                    <select id="manual-student-status" class="p-2 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-full font-semibold">
                                         <option value="出席">出席</option>
                                         <option value="仮出席">仮出席</option>
                                         <option value="欠席">欠席</option>
@@ -425,20 +446,19 @@
                                 </div>
                             </div>
 
-                            <!-- フィルター -->
-                            <div class="bg-slate-100 border border-slate-200 p-2.5 rounded-lg flex flex-wrap items-center gap-1.5 font-semibold text-slate-600">
+                            <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-2.5 rounded-lg flex flex-wrap items-center gap-1.5 font-semibold text-slate-600 dark:text-slate-400">
                                 <span>抽出フィルター:</span>
                                 <button id="filter-all" onclick="setTeacherFilter('all')" class="px-2 py-0.5 rounded bg-indigo-600 text-white transition">すべて (<span id="count-all">0</span>)</button>
-                                <button id="filter-temp" onclick="setTeacherFilter('仮出席')" class="px-2 py-0.5 rounded bg-white border hover:bg-slate-200 transition">仮出席 (<span id="count-temp">0</span>)</button>
-                                <button id="filter-present" onclick="setTeacherFilter('出席')" class="px-2 py-0.5 rounded bg-white border hover:bg-slate-200 transition">出席 (<span id="count-present">0</span>)</button>
-                                <button id="filter-absent" onclick="setTeacherFilter('欠席')" class="px-2 py-0.5 rounded bg-white border hover:bg-slate-200 transition">欠席 (<span id="count-absent">0</span>)</button>
-                                <button id="filter-late" onclick="setTeacherFilter('遅刻')" class="px-2 py-0.5 rounded bg-white border hover:bg-slate-200 transition">遅刻 (<span id="count-late">0</span>)</button>
-                                <button id="filter-fraud" onclick="setTeacherFilter('不正出席')" class="px-2 py-0.5 rounded bg-white border hover:bg-slate-200 transition">不正 (<span id="count-fraud">0</span>)</button>
+                                <button id="filter-temp" onclick="setTeacherFilter('仮出席')" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">仮出席 (<span id="count-temp">0</span>)</button>
+                                <button id="filter-present" onclick="setTeacherFilter('出席')" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">出席 (<span id="count-present">0</span>)</button>
+                                <button id="filter-absent" onclick="setTeacherFilter('欠席')" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">欠席 (<span id="count-absent">0</span>)</button>
+                                <button id="filter-late" onclick="setTeacherFilter('遅刻')" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">遅刻 (<span id="count-late">0</span>)</button>
+                                <button id="filter-fraud" onclick="setTeacherFilter('不正出席')" class="px-2 py-0.5 rounded bg-white dark:bg-slate-800 border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">不正 (<span id="count-fraud">0</span>)</button>
                             </div>
 
-                            <div class="overflow-x-auto bg-white rounded-lg border border-slate-200">
+                            <div class="overflow-x-auto bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                                 <table class="w-full">
-                                    <tbody id="teacher-control-tbody" class="divide-y divide-slate-150 text-[11px]"></tbody>
+                                    <tbody id="teacher-control-tbody" class="divide-y divide-slate-150 dark:divide-slate-700 text-[11px]"></tbody>
                                 </table>
                             </div>
                             <button onclick="saveTeacherOverride()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition shadow-sm">
@@ -446,9 +466,8 @@
                             </button>
                         </div>
 
-                        <!-- 届いた申請一覧 -->
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col space-y-3">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col space-y-3">
+                            <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
                                 <span>📥</span> 届いた救済申請
                             </h3>
                             <div id="application-list-container" class="space-y-2.5 max-h-[420px] overflow-y-auto flex-1"></div>
@@ -459,7 +478,6 @@
         </div>
     </main>
 
-    <!-- 4. JSスクリプト (メモリ上でのデータ管理とシミュレーション) -->
     <script>
         // --- データベース定義 (メモリ) ---
         const studentsList = {
@@ -484,9 +502,9 @@
         ];
 
         let globalAttendanceData = {};
-        let studentEmailsList = []; // 仮出席完了時に蓄積されるあなた宛て疑似メールデータ
-        let activeTeacherFilter = "all"; // 現在のアクティブな教員フィルター
-        let confirmYesCallback = null; // 確認ダイアログコールバック格納用
+        let studentEmailsList = []; // 学生ポータルの「個人宛通知」へ表示されるメール配列
+        let activeTeacherFilter = "all"; 
+        let confirmYesCallback = null; 
 
         // 全20週分のセレクトボックスオプションを生成
         function buildTeacherRoundOptions() {
@@ -510,7 +528,7 @@
             subjects.forEach(subject => {
                 globalAttendanceData[studentId][subject] = [];
                 for (let r = 0; r < 20; r++) {
-                    if (r < 8) { // 初期サンプルデータを生成
+                    if (r < 8) { 
                         const rand = Math.random();
                         if (rand > 0.85) globalAttendanceData[studentId][subject].push("遅刻");
                         else if (rand > 0.2) globalAttendanceData[studentId][subject].push("出席");
@@ -531,12 +549,31 @@
         let authenticatedStudentId = "";
         const BASE_DATE = new Date("2026-04-13");
 
-        // 安全にシミュレーション日付をローカル日付オブジェクトに変換するヘルパー関数 (JST基準)
+        // 🌗 ダークモード切り替えトグル関数
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById("dark-mode-icon").innerText = isDark ? "☀️" : "🌙";
+            document.getElementById("dark-mode-text").innerText = isDark ? "ライトモード" : "ダークモード";
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // 初期ロード時にテーマを確認
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            setTimeout(() => {
+                const icon = document.getElementById("dark-mode-icon");
+                const text = document.getElementById("dark-mode-text");
+                if(icon && text) {
+                    icon.innerText = "☀️";
+                    text.innerText = "ライトモード";
+                }
+            }, 50);
+        }
+
         function getSafeSimulateDate() {
             const inputDateVal = document.getElementById("simulate-date").value;
             if (!inputDateVal) return new Date();
             const parts = inputDateVal.split("-");
-            // Monthは0から始まるため -1 する
             return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
         }
 
@@ -553,7 +590,7 @@
             const inputPassword = document.getElementById("auth-password").value.trim();
 
             if (!studentId || !/^\d+$/.test(inputCard) || !inputPassword) {
-                showAlert("エラー: 入力値に不備があります。学籍番号・カード番号（数字のみ）・パスワードを入力してください。", "error");
+                showAlert("エラー: 入力値に不備があります。学籍番号・カード番号・パスワードを入力してください。", "error");
                 return;
             }
 
@@ -579,7 +616,6 @@
             switchPortal("student");
         }
 
-        // ⚙️ 時間割設定のビルド
         function buildSettingsTimetableEditor() {
             const tbody = document.getElementById("settings-timetable-tbody");
             tbody.innerHTML = "";
@@ -587,12 +623,12 @@
             timetableMap.forEach((row, i) => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td class="p-2 border bg-slate-50 font-semibold text-slate-600">${row.period}</td>
+                    <td class="p-2 border dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-semibold text-slate-600 dark:text-slate-400">${row.period}</td>
                     ${['mon','tue','wed','thu','fri','sat'].map(day => {
                         return `
-                            <td class="p-1 border">
+                            <td class="p-1 border dark:border-slate-700 bg-white dark:bg-slate-800">
                                 <input type="text" data-row="${i}" data-day="${day}" value="${row[day]}" 
-                                       class="w-full p-1 border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none text-center">
+                                       class="w-full p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none text-center text-xs">
                             </td>
                         `;
                     }).join('')}
@@ -601,10 +637,8 @@
             });
         }
 
-        // カスタム時間割の保存
         function saveCustomTimetable() {
             const inputs = document.querySelectorAll("#settings-timetable-tbody input");
-            
             inputs.forEach(input => {
                 const rIndex = parseInt(input.dataset.row);
                 const day = input.dataset.day;
@@ -638,18 +672,15 @@
         function buildApplySubjectOptions() {
             const select = document.getElementById("apply-subject-select");
             select.innerHTML = "";
-            
             let activeSubs = new Set();
             timetableMap.forEach(row => {
                 ['mon','tue','wed','thu','fri','sat'].forEach(day => {
                     if(row[day]) activeSubs.add(row[day]);
                 });
             });
-
             activeSubs.forEach(sub => {
                 const opt = document.createElement("option");
-                opt.value = sub;
-                opt.innerText = sub;
+                opt.value = sub; opt.innerText = sub;
                 select.appendChild(opt);
             });
         }
@@ -660,15 +691,15 @@
             timetableMap.forEach(row => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td class="bg-slate-50 font-bold text-center border p-2 text-xs text-slate-500">${row.period}</td>
+                    <td class="bg-slate-50 dark:bg-slate-900 font-bold text-center border dark:border-slate-700 p-2 text-xs text-slate-500 dark:text-slate-400">${row.period}</td>
                     ${['mon','tue','wed','thu','fri','sat'].map(day => {
                         const sub = row[day];
-                        if(!sub) return `<td class="border p-1 text-center text-xs text-slate-300">-</td>`;
+                        if(!sub) return `<td class="border dark:border-slate-700 p-1 text-center text-xs text-slate-300 dark:text-slate-600">-</td>`;
                         return `
-                            <td class="border p-1">
-                                <div onclick="selectSubjectForStudent('${sub}')" class="cursor-pointer border border-blue-100 bg-blue-50/50 hover:bg-indigo-50 hover:border-indigo-200 p-2 rounded text-center transition">
+                            <td class="border dark:border-slate-700 p-1 bg-white dark:bg-slate-800">
+                                <div onclick="selectSubjectForStudent('${sub}')" class="cursor-pointer border border-blue-100 dark:border-slate-700 bg-blue-50/50 dark:bg-indigo-950/20 hover:bg-indigo-50 dark:hover:bg-slate-700 p-2 rounded text-center transition">
                                     <div class="font-bold text-xs">${sub}</div>
-                                    <div class="text-[10px] text-blue-600 mt-1" id="student-rate-${sub}">0/20</div>
+                                    <div class="text-[10px] text-blue-600 dark:text-indigo-400 mt-1" id="student-rate-${sub}">0/20</div>
                                 </div>
                             </td>
                         `;
@@ -686,15 +717,15 @@
             const pTeacher = document.getElementById("portal-teacher");
 
             if (role === "student") {
-                btnStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 bg-indigo-50 flex justify-center items-center gap-1.5";
-                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex justify-center items-center gap-1.5";
+                btnStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-700 flex justify-center items-center gap-1.5";
+                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-1.5";
                 pStudent.classList.remove("hidden");
                 pTeacher.classList.add("hidden");
                 updateStudentView();
                 renderNotifications();
             } else {
-                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 bg-indigo-50 flex justify-center items-center gap-1.5";
-                btnStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 flex justify-center items-center gap-1.5";
+                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-700 flex justify-center items-center gap-1.5";
+                btnStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-1.5";
                 pTeacher.classList.remove("hidden");
                 pStudent.classList.add("hidden");
                 document.getElementById("teacher-lock-screen").classList.remove("hidden");
@@ -714,6 +745,7 @@
             buildTeacherSubjectOptions();
             buildTeacherRoundOptions(); 
             buildTeacherDetailOptions(); 
+            buildTeacherMailStudentOptions(); // 選択肢初期化
             loadTeacherControlTable();
             loadTeacherApplications();
             renderTeacherTempAttendanceSummary();
@@ -732,7 +764,6 @@
             });
         }
 
-        // 👨‍🏫 カルテ専用の個別選択セレクトボックスの構築
         function buildTeacherDetailOptions() {
             const selectStudent = document.getElementById("teacher-detail-student-select");
             selectStudent.innerHTML = "";
@@ -747,14 +778,76 @@
             selectSubject.innerHTML = "";
             subjects.forEach(sub => {
                 const opt = document.createElement("option");
-                opt.value = sub;
-                opt.innerText = sub;
+                opt.value = sub; opt.innerText = sub;
                 if(sub === "ソフトウェア") opt.selected = true;
                 selectSubject.appendChild(opt);
             });
         }
 
-        // 📊 個別学生カルテ(出力状況詳細)の描画
+        // 📧 メール用宛先リストの構築
+        function buildTeacherMailStudentOptions() {
+            const select = document.getElementById("teacher-mail-student-select");
+            if (!select) return;
+            select.innerHTML = "";
+            Object.keys(studentsList).forEach(studentId => {
+                const opt = document.createElement("option");
+                opt.value = studentId;
+                opt.innerText = `${studentId} - ${studentsList[studentId].name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        // 📝 メールテンプレートの流し込み処理
+        function applyMailTemplate(type) {
+            const studentId = document.getElementById("teacher-mail-student-select").value;
+            const studentName = studentsList[studentId]?.name || "学生";
+            const titleInput = document.getElementById("teacher-mail-title");
+            const bodyInput = document.getElementById("teacher-mail-body");
+
+            if (type === 'warning') {
+                titleInput.value = "【重要・警告】出席率低下に関する面談のお知らせ";
+                bodyInput.value = `${studentName} 様\n\n本講義の出席率が現在「単位取得基準（60%）」を下回る危険性があります。\n次回の講義開始前に、必ず教員室まで状況の報告に来てください。`;
+            } else if (type === 'fraud') {
+                titleInput.value = "【重要】学生証タッチログと提出物の不一致について確認";
+                bodyInput.value = `${studentName} 様\n\n先日の講義において、学生証リーダーへの打刻ログが残っていますが、授業終了時の紙の出席カード（または小テスト）の提出が確認できませんでした。\n不正打刻として判定が「欠席」に上書きされる可能性があります。至急説明に来てください。`;
+            } else if (type === 'interview') {
+                titleInput.value = "【面談通知】PBL演習の進捗および出席確認について";
+                bodyInput.value = `${studentName} 様\n\nPBL演習および各講義の出席進捗に関して、一度個別面談を行いたいと考えています。\n今週木曜日のオフィスアワー（16:30〜）に、教員控室までお越しください。`;
+            }
+            showAlert("📄 選択したテンプレート文面を流し込みました。編集して送信可能です。", "success");
+        }
+
+        // 🚀 教員から学生への疑似メール送信実行
+        function sendTeacherCustomMail() {
+            const studentId = document.getElementById("teacher-mail-student-select").value;
+            const title = document.getElementById("teacher-mail-title").value.trim();
+            const body = document.getElementById("teacher-mail-body").value.trim();
+
+            if (!title || !body) {
+                showAlert("エラー: 件名または本文が空欄です。", "error");
+                return;
+            }
+
+            // 学生宛通知リストへ格納
+            studentEmailsList.unshift({
+                id: Date.now(),
+                isCustomTeacherMail: true,
+                subjectName: "教員からの個別連絡",
+                mailTitle: title,
+                mailBody: body,
+                time: getSafeSimulateDate().toLocaleDateString('ja-JP') + " " + new Date().toLocaleTimeString('ja-JP'),
+                studentId: studentId,
+                studentName: studentsList[studentId].name
+            });
+
+            showAlert(`📨 サクセス: ${studentsList[studentId].name} さん宛に個人通知メールを配信しました。`, "success");
+            
+            // 入力欄をクリア
+            document.getElementById("teacher-mail-title").value = "";
+            document.getElementById("teacher-mail-body").value = "";
+            renderNotifications();
+        }
+
         function renderStudentDetailCard() {
             const studentId = document.getElementById("teacher-detail-student-select").value;
             const subject = document.getElementById("teacher-detail-subject-select").value;
@@ -773,14 +866,14 @@
             const rawRate = (attendanceScore / 20) * 100;
             const attendanceRate = Math.min(100, Math.round(rawRate));
 
-            let badgeClass = "bg-green-100 text-green-800 border border-green-200";
+            let badgeClass = "bg-green-100 text-green-800 border border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-900";
             let badgeText = "順調 (良好)";
             
             if (attendanceRate < 60 || counts["欠席"] >= 9) {
-                badgeClass = "bg-red-100 text-red-800 border border-red-200 font-bold animate-pulse";
+                badgeClass = "bg-red-100 text-red-800 border border-red-200 font-bold animate-pulse dark:bg-red-950 dark:text-red-300 dark:border-red-900";
                 badgeText = "⚠️ 単位危険";
             } else if (attendanceRate < 80) {
-                badgeClass = "bg-yellow-100 text-yellow-800 border border-yellow-200";
+                badgeClass = "bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-900";
                 badgeText = "注意 (出席率低下)";
             }
 
@@ -790,14 +883,14 @@
             }
 
             let html = `
-                <div class="flex flex-wrap justify-between items-start gap-2 border-b pb-3 mb-2">
+                <div class="flex flex-wrap justify-between items-start gap-2 border-b dark:border-slate-700 pb-3 mb-2">
                     <div>
                         <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">学生情報</span>
-                        <strong class="text-sm text-indigo-900 font-bold block">${studentId} - ${name}</strong>
+                        <strong class="text-sm text-indigo-900 dark:text-indigo-400 font-bold block">${studentId} - ${name}</strong>
                     </div>
                     <div>
                         <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider font-mono">講義科目</span>
-                        <strong class="text-xs text-slate-700 font-bold block bg-slate-100 px-2 py-0.5 rounded border border-slate-200">${subject}</strong>
+                        <strong class="text-xs text-slate-700 dark:text-slate-300 font-bold block bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">${subject}</strong>
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">単位評価判定</span>
@@ -805,55 +898,51 @@
                     </div>
                 </div>
 
-                <!-- 集計内訳 -->
-                <div class="grid grid-cols-5 gap-1 text-center text-xs pb-3 border-b border-dashed border-slate-200">
-                    <div class="bg-green-50/50 p-1 rounded border border-green-100">
+                <div class="grid grid-cols-5 gap-1 text-center text-xs pb-3 border-b border-dashed border-slate-200 dark:border-slate-700">
+                    <div class="bg-green-50/50 dark:bg-green-950/20 p-1 rounded border border-green-100 dark:border-green-900">
                         <div class="text-slate-500 text-[9px]">出席</div>
-                        <div class="font-bold font-mono text-green-700 text-sm">${counts["出席"]}</div>
+                        <div class="font-bold font-mono text-green-700 dark:text-green-400 text-sm">${counts["出席"]}</div>
                     </div>
-                    <div class="bg-amber-50/50 p-1 rounded border border-amber-100">
+                    <div class="bg-amber-50/50 dark:bg-amber-950/20 p-1 rounded border border-amber-100 dark:border-amber-900">
                         <div class="text-slate-500 text-[9px]">仮出席</div>
-                        <div class="font-bold font-mono text-amber-700 text-sm">${counts["仮出席"]}</div>
+                        <div class="font-bold font-mono text-amber-700 dark:text-amber-400 text-sm">${counts["仮出席"]}</div>
                     </div>
-                    <div class="bg-yellow-50/50 p-1 rounded border border-yellow-100">
+                    <div class="bg-yellow-50/50 dark:bg-yellow-950/20 p-1 rounded border border-yellow-100 dark:border-yellow-900">
                         <div class="text-slate-500 text-[9px]">遅刻</div>
-                        <div class="font-bold font-mono text-yellow-700 text-sm">${counts["遅刻"]}</div>
+                        <div class="font-bold font-mono text-yellow-700 dark:text-yellow-400 text-sm">${counts["遅刻"]}</div>
                     </div>
-                    <div class="bg-slate-100/50 p-1 rounded border border-slate-200">
+                    <div class="bg-slate-100/50 dark:bg-slate-800/60 p-1 rounded border border-slate-200 dark:border-slate-700">
                         <div class="text-slate-500 text-[9px]">欠席</div>
-                        <div class="font-bold font-mono text-slate-600 text-sm">${counts["欠席"]}</div>
+                        <div class="font-bold font-mono text-slate-600 dark:text-slate-400 text-sm">${counts["欠席"]}</div>
                     </div>
-                    <div class="bg-red-50 p-1 rounded border border-red-100">
+                    <div class="bg-red-50 dark:bg-red-950/20 p-1 rounded border border-red-100 dark:border-red-900">
                         <div class="text-red-500 text-[9px] font-bold">不正</div>
-                        <div class="font-bold font-mono text-red-700 text-sm">${counts["不正出席"]}</div>
+                        <div class="font-bold font-mono text-red-700 dark:text-red-400 text-sm">${counts["不正出席"]}</div>
                     </div>
                 </div>
 
-                <!-- 出席率バー -->
                 <div class="space-y-1">
-                    <div class="flex justify-between text-[10px] font-bold text-slate-500">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
                         <span>出席率 (全20回評価)</span>
                         <span class="font-mono">${attendanceRate}%</span>
                     </div>
-                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                         <div class="h-full ${attendanceRate < 60 ? 'bg-red-500' : attendanceRate < 80 ? 'bg-yellow-500' : 'bg-green-500'}" style="width: ${attendanceRate}%"></div>
                     </div>
                 </div>
 
-                <!-- 全20回進捗グリッド -->
                 <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-1.5 pt-2">
             `;
 
             records.forEach((status, i) => {
-                let colorClass = "bg-slate-100 text-slate-400 border border-slate-200";
-                if (status === "出席") colorClass = "bg-green-100 text-green-800 font-bold border border-green-200";
-                if (status === "仮出席") colorClass = "bg-amber-100 text-amber-800 font-bold border border-amber-300 animate-pulse";
-                if (status === "遅刻") colorClass = "bg-yellow-100 text-yellow-800 font-bold border border-yellow-300";
-                if (status === "公欠") colorClass = "bg-purple-100 text-purple-800 font-bold border border-purple-200";
-                if (status === "不正出席") colorClass = "bg-red-100 text-red-800 font-bold border border-red-300 animate-pulse";
+                let colorClass = "bg-slate-100 text-slate-400 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500";
+                if (status === "出席") colorClass = "bg-green-100 text-green-800 font-bold border border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-900";
+                if (status === "仮出席") colorClass = "bg-amber-100 text-amber-800 font-bold border border-amber-300 animate-pulse dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900";
+                if (status === "遅刻") colorClass = "bg-yellow-100 text-yellow-800 font-bold border border-yellow-300 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-900";
+                if (status === "公欠") colorClass = "bg-purple-100 text-purple-800 font-bold border border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-900";
+                if (status === "不正出席") colorClass = "bg-red-100 text-red-800 font-bold border border-red-300 animate-pulse dark:bg-red-950 dark:text-red-300 dark:border-red-900";
 
                 const logTime = studentsList[studentId]?.touchLog[i] || "記録なし";
-
                 html += `
                     <div class="p-1 rounded text-center ${colorClass} text-[10px] cursor-help relative group" title="打刻ログ: ${logTime}">
                         <div class="opacity-75">第 ${i+1} 回</div>
@@ -862,10 +951,7 @@
                 `;
             });
 
-            html += `
-                </div>
-            `;
-
+            html += `</div>`;
             content.innerHTML = html;
         }
 
@@ -957,26 +1043,19 @@
             const subject = document.getElementById("teacher-subject-select").value;
             const roundIndex = parseInt(document.getElementById("teacher-lecture-round").value);
 
-            if (!studentId) {
-                showAlert("エラー: 学籍番号を入力してください。", "error");
-                return;
-            }
-
-            if (!studentsList[studentId]) {
-                showAlert(`エラー: 学籍番号「${studentId}」は登録されていません。`, "error");
+            if (!studentId || !studentsList[studentId]) {
+                showAlert("エラー: 正しい学籍番号を入力してください。", "error");
                 return;
             }
 
             globalAttendanceData[studentId][subject][roundIndex] = status;
-            
             if (status !== "欠席" && !studentsList[studentId].touchLog[roundIndex]) {
-                studentsList[studentId].touchLog[roundIndex] = "教員手動個別指定 (" + new Date().toLocaleTimeString() + ")";
+                studentsList[studentId].touchLog[roundIndex] = "教員個別指定 (" + new Date().toLocaleTimeString() + ")";
             } else if (status === "欠席") {
                 delete studentsList[studentId].touchLog[roundIndex];
             }
 
             showAlert(`💾 保存完了: ${studentId} の ${subject}（第${roundIndex+1}回）判定を「${status}」に設定しました。`, "success");
-            
             document.getElementById("manual-student-id").value = ""; 
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
@@ -986,26 +1065,17 @@
 
         function setTeacherFilter(filterMode) {
             activeTeacherFilter = filterMode;
-            
             const filterButtons = ["all", "temp", "present", "absent", "late", "fraud"];
-            const modeMap = {
-                "all": "all",
-                "temp": "仮出席",
-                "present": "出席",
-                "absent": "欠席",
-                "late": "遅刻",
-                "fraud": "不正出席"
-            };
+            const modeMap = { "all": "all", "temp": "仮出席", "present": "出席", "absent": "欠席", "late": "遅刻", "fraud": "不正出席" };
 
             filterButtons.forEach(btnId => {
                 const element = document.getElementById(`filter-${btnId}`);
                 if (modeMap[btnId] === filterMode || (btnId === "all" && filterMode === "all")) {
                     element.className = "px-2.5 py-1 rounded bg-indigo-600 text-white shadow-sm transition";
                 } else {
-                    element.className = "px-2.5 py-1 rounded bg-white hover:bg-slate-200 transition text-slate-700 border";
+                    element.className = "px-2.5 py-1 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition border dark:border-slate-700";
                 }
             });
-
             loadTeacherControlTable();
         }
 
@@ -1017,9 +1087,9 @@
                 const badge = document.getElementById(`student-rate-${subject}`);
                 if (badge) {
                     badge.innerText = `${count} / 20`;
-                    badge.className = count >= 15 ? "text-[10px] font-semibold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full mt-1 inline-block" :
-                                      count <= 11 ? "text-[10px] font-semibold text-red-700 bg-red-100 px-1.5 py-0.5 rounded-full mt-1 inline-block" :
-                                      "text-[10px] font-semibold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded-full mt-1 inline-block";
+                    badge.className = count >= 15 ? "text-[10px] font-semibold text-green-700 bg-green-100 dark:bg-green-950 dark:text-green-300 px-1.5 py-0.5 rounded-full mt-1 inline-block" :
+                                      count <= 11 ? "text-[10px] font-semibold text-red-700 bg-red-100 dark:bg-red-950 dark:text-red-300 px-1.5 py-0.5 rounded-full mt-1 inline-block" :
+                                      "text-[10px] font-semibold text-blue-700 bg-blue-100 dark:bg-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded-full mt-1 inline-block";
                 }
             });
             const activeSub = document.getElementById("student-panel-title").dataset.subject || "英語Ⅰ";
@@ -1042,12 +1112,12 @@
             records.forEach((status, i) => {
                 if (["出席","公欠","遅刻","仮出席"].includes(status)) count++;
                 const item = document.createElement("div");
-                item.className = "bg-white p-2 border border-slate-200 rounded text-center";
-                let cls = status === "出席" ? "bg-green-100 text-green-800 font-semibold" :
-                          status === "遅刻" ? "bg-yellow-100 text-yellow-800 font-semibold" :
-                          status === "仮出席" ? "bg-amber-100 text-amber-800 font-semibold border border-amber-300 animate-pulse" :
-                          status === "不正出席" ? "bg-red-100 text-red-800 font-bold border border-red-200 animate-pulse" : "bg-slate-100 text-slate-400";
-                item.innerHTML = `<div class="text-[10px] text-slate-400 font-mono">第 ${i+1} 回</div><div class="text-xs py-1 my-1 rounded ${cls}">${status}</div>`;
+                item.className = "bg-white dark:bg-slate-800 p-2 border border-slate-200 dark:border-slate-700 rounded text-center";
+                let cls = status === "出席" ? "bg-green-100 text-green-800 font-semibold dark:bg-green-950 dark:text-green-300" :
+                          status === "遅刻" ? "bg-yellow-100 text-yellow-800 font-semibold dark:bg-yellow-950 dark:text-yellow-300" :
+                          status === "仮出席" ? "bg-amber-100 text-amber-800 font-semibold border border-amber-300 animate-pulse dark:bg-amber-950 dark:text-amber-300" :
+                          status === "不正出席" ? "bg-red-100 text-red-800 font-bold border border-red-200 animate-pulse dark:bg-red-950 dark:text-red-300" : "bg-slate-100 text-slate-400 dark:bg-slate-900 dark:text-slate-600";
+                item.innerHTML = `<div class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">第 ${i+1} 回</div><div class="text-xs py-1 my-1 rounded ${cls}">${status}</div>`;
                 container.appendChild(item);
             });
             document.getElementById("student-summary-count").innerText = count;
@@ -1060,7 +1130,6 @@
                 showAlert("認証エラー: 学生証番号またはパスワードが一致しません。", "error");
                 return;
             }
-            // タイムゾーンのバグを防ぎ、シミュレーション日に完全同期
             const now = getSafeSimulateDate();
             const diffDays = Math.floor((now - BASE_DATE) / (1000 * 60 * 60 * 24));
             const round = Math.max(0, Math.min(19, Math.floor(diffDays / 7))); 
@@ -1085,7 +1154,6 @@
             renderNotifications();
         }
 
-        // 救済申請の曜日判定も完全にgetSafeSimulateDate()に基づきタイムゾーンバグを回避
         function submitStudentApplication() {
             const subject = document.getElementById("apply-subject-select").value;
             const reason = document.getElementById("apply-reason").value.trim();
@@ -1096,7 +1164,6 @@
                 return;
             }
 
-            // 安全にパースしたシミュレーション日付を使用 (日本時間ローカル基準)
             const simDate = getSafeSimulateDate();
             const simDayIndex = simDate.getDay(); 
             const dayMap = { 0: "sun", 1: "mon", 2: "tue", 3: "wed", 4: "thu", 5: "fri", 6: "sat" };
@@ -1105,22 +1172,16 @@
             let correctDayName = "";
 
             timetableMap.forEach(row => {
-                ['mon','tue','wed','thu','fri','sat'].forEach((dayKey, idx) => {
+                ['mon','tue','wed','thu','fri','sat'].forEach((dayKey) => {
                     if (row[dayKey] === subject) {
-                        correctDayName = dayKey === "mon" ? "月曜日" : 
-                                         dayKey === "tue" ? "火曜日" : 
-                                         dayKey === "wed" ? "水曜日" : 
-                                         dayKey === "thu" ? "木曜日" : 
-                                         dayKey === "fri" ? "金曜日" : "土曜日";
-                        if (dayMap[simDayIndex] === dayKey) {
-                            scheduledOnSimDay = true;
-                        }
+                        correctDayName = dayKey === "mon" ? "月曜日" : dayKey === "tue" ? "火曜日" : dayKey === "wed" ? "水曜日" : dayKey === "thu" ? "木曜日" : dayKey === "fri" ? "金曜日" : "土曜日";
+                        if (dayMap[simDayIndex] === dayKey) scheduledOnSimDay = true;
                     }
                 });
             });
 
             if (!scheduledOnSimDay) {
-                showAlert(`提出エラー: 「${subject}」は${correctDayName}の授業です。救済申請は該当講義の当日中（シミュレーション日）のみ受け付けています。`, "error");
+                showAlert(`提出エラー: 「${subject}」は${correctDayName}の授業です。救済申請は該当講義の当日中のみ受け付けています。`, "error");
                 return;
             }
 
@@ -1132,7 +1193,6 @@
             renderNotifications(); 
         }
 
-        // 教員用ポータルの仮出席者まとめレンダリング処理
         function renderTeacherTempAttendanceSummary() {
             const container = document.getElementById("teacher-temp-attendance-list");
             if (!container) return;
@@ -1143,13 +1203,12 @@
                 Object.keys(globalAttendanceData[studentId]).forEach(subject => {
                     globalAttendanceData[studentId][subject].forEach((status, i) => {
                         if (status === "仮出席") {
-                            const touchTime = studentsList[studentId]?.touchLog[i] || "打刻あり";
                             tempList.push({
                                 studentId: studentId,
                                 name: studentsList[studentId]?.name || "学生",
                                 subject: subject,
                                 round: i + 1,
-                                touchTime: touchTime
+                                touchTime: studentsList[studentId]?.touchLog[i] || "打刻あり"
                             });
                         }
                     });
@@ -1163,14 +1222,14 @@
 
             tempList.forEach(item => {
                 const card = document.createElement("div");
-                card.className = "bg-amber-50 border border-amber-200 rounded-lg p-2.5 space-y-1";
+                card.className = "bg-amber-50 dark:bg-slate-800 border border-amber-200 dark:border-amber-900 rounded-lg p-2.5 space-y-1 text-slate-800 dark:text-slate-200";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center font-bold text-amber-900">
+                    <div class="flex justify-between items-center font-bold text-amber-900 dark:text-amber-400">
                         <span>学籍 S${item.studentId.substring(1)}: ${item.name}</span>
-                        <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">仮出席中</span>
+                        <span class="bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider">仮出席中</span>
                     </div>
-                    <div class="text-[10px] text-slate-600">
-                        講義: <strong class="text-slate-900">${item.subject}</strong> (第 ${item.round} 回) | 時間: ${item.touchTime}
+                    <div class="text-[10px] text-slate-600 dark:text-slate-400">
+                        講義: <strong class="text-slate-900 dark:text-white">${item.subject}</strong> (第 ${item.round} 回)
                     </div>
                 `;
                 container.appendChild(card);
@@ -1190,23 +1249,19 @@
                 const status = globalAttendanceData[sid][subject][round];
                 
                 counts.all++;
-                if (counts[status] !== undefined) {
-                    counts[status]++;
-                }
+                if (counts[status] !== undefined) counts[status]++;
 
-                if (activeTeacherFilter !== "all" && status !== activeTeacherFilter) {
-                    return; 
-                }
+                if (activeTeacherFilter !== "all" && status !== activeTeacherFilter) return; 
 
                 const log = sinfo.touchLog[round];
                 const tr = document.createElement("tr");
-                if (status === "仮出席") tr.className = "bg-amber-50/30";
+                if (status === "仮出席") tr.className = "bg-amber-50/30 dark:bg-amber-950/10";
                 tr.innerHTML = `
-                    <td class="p-2.5 font-mono font-semibold text-slate-700">${sid}</td>
-                    <td class="p-2.5 text-slate-700">${sinfo.name}</td>
-                    <td class="p-2.5 text-[10px]">${log ? `<span class="text-green-600 font-bold">⏰ タッチ記録あり (${log})</span>` : `<span class="text-slate-400">記録なし</span>`}</td>
+                    <td class="p-2.5 font-mono font-semibold text-slate-700 dark:text-slate-300">${sid}</td>
+                    <td class="p-2.5 text-slate-700 dark:text-slate-300">${sinfo.name}</td>
+                    <td class="p-2.5 text-[10px]">${log ? `<span class="text-green-600 dark:text-green-400 font-bold">⏰ タッチあり (${log})</span>` : `<span class="text-slate-400 dark:text-slate-500">記録なし</span>`}</td>
                     <td class="p-2.5">
-                        <select data-student="${sid}" class="p-1 text-xs border border-slate-250 rounded bg-white font-semibold">
+                        <select data-student="${sid}" class="p-1 text-xs border dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-semibold">
                             ${["出席","仮出席","欠席","遅刻","公欠","不正出席"].map(opt => `<option value="${opt}" ${status===opt?'selected':''}>${opt==='不正出席'?'🚨 不正出席':opt}</option>`).join('')}
                         </select>
                     </td>
@@ -1220,12 +1275,6 @@
             document.getElementById("count-absent").innerText = counts["欠席"];
             document.getElementById("count-late").innerText = counts["遅刻"];
             document.getElementById("count-fraud").innerText = counts["不正出席"];
-
-            if (tbody.children.length === 0) {
-                const emptyTr = document.createElement("tr");
-                emptyTr.innerHTML = `<td colspan="4" class="p-4 text-center text-xs text-slate-400">条件に合う出席判定結果は見つかりませんでした。</td>`;
-                tbody.appendChild(emptyTr);
-            }
         }
 
         function saveTeacherOverride() {
@@ -1234,7 +1283,7 @@
             document.querySelectorAll("#teacher-control-tbody select").forEach(sel => {
                 globalAttendanceData[sel.dataset.student][subject][round] = sel.value;
             });
-            showAlert("💾 保存完了: 講義回の出席データを上書き登録しました。", "success");
+            showAlert("💾 保存完了: 出席データを上書き更新しました。", "success");
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
             renderStudentDetailCard(); 
@@ -1251,13 +1300,13 @@
             }
             active.forEach(app => {
                 const card = document.createElement("div");
-                card.className = "bg-white p-3 border border-slate-200 rounded-lg shadow-xs text-xs space-y-2";
+                card.className = "bg-white dark:bg-slate-800 p-3 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xs text-xs space-y-2 text-slate-800 dark:text-slate-200";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center font-bold text-slate-700"><span>${app.userId} : ${app.userName}</span></div>
-                    <div class="text-[10px] text-indigo-700 font-bold">講義: ${app.subjectName}</div>
-                    <p class="text-slate-600 bg-slate-50 p-2 rounded italic text-[10px] leading-relaxed">"${app.reason}"</p>
+                    <div class="flex justify-between items-center font-bold text-slate-700 dark:text-slate-300"><span>${app.userId} : ${app.userName}</span></div>
+                    <div class="text-[10px] text-indigo-700 dark:text-indigo-400 font-bold">講義: ${app.subjectName}</div>
+                    <p class="text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-2 rounded italic text-[10px] leading-relaxed">"${app.reason}"</p>
                     <div class="flex gap-1.5 text-[10px] pt-1">
-                        <button onclick="resolveApplication(${app.id}, '承認')" class="flex-1 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded">承認(出席)</button>
+                        <button onclick="resolveApplication(${app.id}, '承認')" class="flex-1 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded">承認</button>
                         <button onclick="resolveApplication(${app.id}, '却下')" class="flex-1 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded">却下</button>
                     </div>
                 `;
@@ -1286,33 +1335,50 @@
             const personal = document.getElementById("personal-notifications");
             personal.innerHTML = "";
 
+            // 教員からの個別メッセージ・通知・自動打刻メールのレンダリング
             studentEmailsList.forEach(email => {
                 if (email.studentId === authenticatedStudentId) {
                     const mailDiv = document.createElement("div");
-                    mailDiv.className = "p-3 rounded-lg text-xs bg-indigo-50 border border-indigo-150 text-slate-800 space-y-1.5 shadow-xs";
-                    mailDiv.innerHTML = `
-                        <div class="flex items-center justify-between font-bold text-indigo-900 border-b pb-1 border-indigo-150">
-                            <span>📧 学生証タッチ自動通知</span>
-                            <span class="text-[9px] bg-indigo-200 px-1.5 py-0.5 rounded text-indigo-800 uppercase">仮出席</span>
-                        </div>
-                        <p class="font-bold text-[10px] text-slate-700">${email.studentName} 様</p>
-                        <p class="leading-relaxed text-[11px]">授業リーダーへのカードタッチを検知し、一時的な打刻ログをシステムに記録しました。</p>
-                        <div class="bg-white p-2 rounded border font-mono text-[10px] text-slate-600 space-y-0.5">
-                            <div>科目: ${email.subjectName} (第 ${email.roundNum} 回)</div>
-                            <div>時刻: ${email.time}</div>
-                        </div>
-                        <p class="text-[10px] text-red-600 font-bold leading-relaxed">
-                            ⚠️ 注意：講義終了後、教員により回収物（ミニッツペーパー等）の照合・対面確認が行われます。提出物がない場合は不正出席（単位警告）に自動変更されます。
-                        </p>
-                    `;
+                    
+                    if (email.isCustomTeacherMail) {
+                        // 👨‍🏫 教員からの個別メッセージ
+                        mailDiv.className = "p-3 rounded-lg text-xs bg-amber-50 dark:bg-slate-900 border border-amber-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 space-y-1.5 shadow-xs";
+                        mailDiv.innerHTML = `
+                            <div class="flex items-center justify-between font-bold text-amber-900 dark:text-amber-400 border-b pb-1 border-amber-100 dark:border-slate-700">
+                                <span class="flex items-center gap-1">📨 教員からの個別通知メール</span>
+                                <span class="text-[9px] bg-amber-200 dark:bg-amber-950 px-1.5 py-0.5 rounded text-amber-800 dark:text-amber-300 uppercase font-bold">新着信</span>
+                            </div>
+                            <div class="font-bold text-xs text-slate-900 dark:text-white mt-1">件名: ${email.mailTitle}</div>
+                            <p class="whitespace-pre-wrap leading-relaxed text-[11px] bg-white dark:bg-slate-800 p-2.5 rounded border dark:border-slate-700 font-mono mt-1 text-slate-700 dark:text-slate-300">` + email.mailBody + `</p>
+                            <div class="text-[9px] text-right text-slate-400">受信日時: ${email.time}</div>
+                        `;
+                    } else {
+                        // 💳 通常の打刻自動通知
+                        mailDiv.className = "p-3 rounded-lg text-xs bg-indigo-50 dark:bg-slate-900 border border-indigo-150 dark:border-slate-700 text-slate-800 dark:text-slate-200 space-y-1.5 shadow-xs";
+                        mailDiv.innerHTML = `
+                            <div class="flex items-center justify-between font-bold text-indigo-900 dark:text-indigo-400 border-b pb-1 border-indigo-150 dark:border-slate-700">
+                                <span>📧 学生証タッチ自動通知</span>
+                                <span class="text-[9px] bg-indigo-200 dark:bg-indigo-950 px-1.5 py-0.5 rounded text-indigo-800 dark:text-indigo-300 uppercase">仮出席</span>
+                            </div>
+                            <p class="font-bold text-[10px] text-slate-700 dark:text-slate-300">${email.studentName} 様</p>
+                            <p class="leading-relaxed text-[11px]">授業リーダーへのタッチを検知し、一時的な打刻ログをシステムに記録しました。</p>
+                            <div class="bg-white dark:bg-slate-800 p-2 rounded border dark:border-slate-700 font-mono text-[10px] text-slate-600 dark:text-slate-400 space-y-0.5">
+                                <div>科目: ${email.subjectName} (第 ${email.roundNum} 回)</div>
+                                <div>時刻: ${email.time}</div>
+                            </div>
+                            <p class="text-[10px] text-red-600 dark:text-red-400 font-bold leading-relaxed">
+                                ⚠️ 回収物との照合が一致しない場合、不正出席扱いに引き下げられます。
+                            </p>
+                        `;
+                    }
                     personal.appendChild(mailDiv);
                 }
             });
 
             globalApplications.filter(a => a.userId === authenticatedStudentId).forEach(app => {
                 const div = document.createElement("div");
-                div.className = `p-3 rounded-lg text-xs border ${app.status==='承認'?'bg-green-50 border-green-200':app.status==='却下'?'bg-red-50 border-red-200':'bg-amber-50 border-amber-200'}`;
-                div.innerHTML = `<div class="flex justify-between font-bold"><span>📋 救済申請結果：${app.subjectName}</span><span>${app.status}</span></div><p class="text-slate-600 text-[10px] mt-1 italic">"${app.reason}"</p>`;
+                div.className = `p-3 rounded-lg text-xs border ${app.status==='承認'?'bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-900 text-green-900 dark:text-green-300':app.status==='却下'?'bg-red-50 border-red-200 dark:bg-red-950 dark:border-red-900 text-red-900 dark:text-red-300':'bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-900 text-amber-900 dark:text-amber-300'}`;
+                div.innerHTML = `<div class="flex justify-between font-bold"><span>📋 救済申請結果：${app.subjectName}</span><span>${app.status}</span></div><p class="text-slate-600 dark:text-slate-400 text-[10px] mt-1 italic">"${app.reason}"</p>`;
                 personal.appendChild(div);
             });
 
@@ -1323,8 +1389,8 @@
                     globalAttendanceData[sid][sub].forEach((status, i) => {
                         if (status === "不正出席") {
                             const div = document.createElement("div");
-                            div.className = "p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 shadow-xs";
-                            div.innerHTML = `<div class="font-bold text-red-800">🚨 不正出席警告の対象</div><p class="text-[10px] mt-1">学籍 S${sid.substring(1)}: ${studentsList[sid]?.name} - ${sub}（第 ${i+1} 回）授業終了時の対面確認が一致しなかったため、欠席として評価判定が引き下げられました。</p>`;
+                            div.className = "p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg text-xs text-red-900 dark:text-red-300 shadow-xs";
+                            div.innerHTML = `<div class="font-bold text-red-800 dark:text-red-400">🚨 不正出席警告の対象</div><p class="text-[10px] mt-1">学籍 S${sid.substring(1)}: ${studentsList[sid]?.name} - ${sub}（第 ${i+1} 回）授業終了時の対面確認が一致しなかったため、評価判定が引き下げられました。</p>`;
                             globalCont.appendChild(div);
                         }
                     });
@@ -1335,16 +1401,13 @@
         function showAlert(msg, type = "success") {
             const banner = document.getElementById("alert-banner");
             document.getElementById("alert-text").innerText = msg;
-            banner.className = `mb-6 p-4 rounded-xl shadow-sm font-semibold flex justify-between items-center transition-all duration-300 ${type==='success'?'bg-green-100 text-green-800 border-green-200':'bg-red-100 text-red-800 border-red-200'}`;
+            banner.className = `mb-6 p-4 rounded-xl shadow-sm font-semibold flex justify-between items-center transition-all duration-300 ${type==='success'?'bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-900':'bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-900'}`;
             banner.classList.remove("hidden");
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function closeAlert() { document.getElementById("alert-banner").classList.add("hidden"); }
-        
-        window.onload = function() { 
-            updateWeekDisplay(); 
-        };
+        window.onload = function() { updateWeekDisplay(); };
     </script>
 </body>
 </html>
