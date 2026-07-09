@@ -328,18 +328,32 @@
                     <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
                         <div class="flex items-center gap-2 border-b pb-2">
                             <span class="text-xl">👤</span>
-                            <h3 class="font-bold text-slate-800 text-sm">個別学生カルテ（出席状況の個別出力・詳細確認）</h3>
+                            <h3 class="font-bold text-slate-800 text-sm">個別学生カルテ（出席状況の個別出力・詳細分析・自動評価判定）</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1.5">学生を選択 (学籍番号または名前)</label>
-                                <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2.5 text-xs bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <!-- JSで動的に登録学生を生成 -->
-                                </select>
+                            <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">学生を選択 (学籍番号または名前)</label>
+                                    <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2.5 text-xs bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <!-- JSで動的に登録学生を生成 -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">講義科目を選択</label>
+                                    <select id="teacher-detail-subject-select" onchange="renderStudentDetailCard()" class="p-2.5 text-xs bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <!-- JSで動的に追加科目を同期生成 -->
+                                    </select>
+                                </div>
+                                <div class="pt-2 border-t border-slate-200">
+                                    <span class="text-[10px] text-slate-400 font-bold block mb-1">💡 教員向けナビ:</span>
+                                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                                        上記2箇所を選択すると、該当学生の該当科目におけるトータル集計、プログレスバー、警告通知、および全20回それぞれの打刻状態が一括出力されます。
+                                    </p>
+                                </div>
                             </div>
-                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-center">
                                 <div id="student-detail-card-content" class="space-y-4">
-                                    <!-- JSで選択学生の全20回分のステータスをグリッド出力 -->
+                                    <!-- JSで選択学生の特定科目の全20回分のステータスをグリッド出力 -->
                                 </div>
                             </div>
                         </div>
@@ -701,11 +715,12 @@
             
             buildTeacherSubjectOptions();
             buildTeacherRoundOptions(); 
-            buildTeacherDetailStudentSelect(); // 新設：個別詳細確認用の学生リスト同期
+            buildTeacherDetailStudentSelect(); // 動的な登録学生リスト
+            buildTeacherDetailSubjectSelect(); // 動的な個別カルテ用の科目セレクト
             loadTeacherControlTable();
             loadTeacherApplications();
             renderTeacherTempAttendanceSummary();
-            renderStudentDetailCard(); // 新設：初期カード描画
+            renderStudentDetailCard(); // 初期カード描画
         }
 
         function buildTeacherSubjectOptions() {
@@ -720,7 +735,6 @@
             });
         }
 
-        // 🆕 新設：個別詳細確認セレクトの組み立て
         function buildTeacherDetailStudentSelect() {
             const select = document.getElementById("teacher-detail-student-select");
             select.innerHTML = "";
@@ -732,28 +746,113 @@
             });
         }
 
-        // 🆕 新設：選択された個別学生の全20回分の出席詳細を美しくカード出力
+        // 🆕 個別カルテ用の科目選択肢を構築
+        function buildTeacherDetailSubjectSelect() {
+            const select = document.getElementById("teacher-detail-subject-select");
+            const prev = select.value || "ソフトウェア";
+            select.innerHTML = "";
+            subjects.forEach(sub => {
+                const opt = document.createElement("option");
+                opt.value = sub;
+                opt.innerText = sub;
+                if (sub === prev) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // 📊 🆕 改良：選択学生×選択科目のトータル出席統計・進捗率を含む豪華なカルテを出力
         function renderStudentDetailCard() {
             const studentId = document.getElementById("teacher-detail-student-select").value;
-            const subject = document.getElementById("teacher-subject-select").value;
+            const subject = document.getElementById("teacher-detail-subject-select").value;
             const content = document.getElementById("student-detail-card-content");
-            if (!studentId || !content) return;
+            if (!studentId || !subject || !content) return;
 
             const name = studentsList[studentId].name;
             const records = globalAttendanceData[studentId][subject] || Array(20).fill("欠席");
             
+            // 各ステータスの集計計算
+            let counts = { "出席": 0, "仮出席": 0, "遅刻": 0, "欠席": 0, "公欠": 0, "不正出席": 0 };
+            records.forEach(status => {
+                if (counts[status] !== undefined) {
+                    counts[status]++;
+                }
+            });
+
+            // 出席率の算定 (遅刻は0.7回分、公欠は1回分換算)
+            const attendanceScore = counts["出席"] + counts["公欠"] + (counts["遅刻"] * 0.7);
+            const rawRate = (attendanceScore / 20) * 100;
+            const attendanceRate = Math.min(100, Math.round(rawRate));
+
+            // 出席率に応じた警告バッジクラス
+            let badgeClass = "bg-green-100 text-green-800 border border-green-200";
+            let badgeText = "順調 (良好)";
+            
+            if (attendanceRate < 60 || counts["欠席"] >= 9) {
+                badgeClass = "bg-red-100 text-red-800 border border-red-200 font-bold animate-pulse";
+                badgeText = "⚠️ 単位危険 (60%未満/欠席過多)";
+            } else if (attendanceRate < 80) {
+                badgeClass = "bg-yellow-100 text-yellow-800 border border-yellow-200";
+                badgeText = "注意 (出席率低下)";
+            }
+
+            if (counts["不正出席"] > 0) {
+                badgeClass = "bg-red-700 text-white font-bold border border-red-900 animate-bounce";
+                badgeText = "🚨 不正出席検知 (要面談)";
+            }
+
             let html = `
-                <div class="flex justify-between items-center flex-wrap gap-2 border-b pb-2">
+                <div class="flex flex-wrap justify-between items-start gap-3 border-b pb-3 mb-2">
                     <div>
-                        <span class="text-xs font-bold text-slate-400">対象学生:</span>
-                        <strong class="text-sm text-indigo-900 block font-bold">${studentId} - ${name}</strong>
+                        <span class="text-[10px] font-bold text-slate-400 block uppercase">Student information</span>
+                        <strong class="text-sm text-indigo-900 font-bold block">${studentId} - ${name}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 block uppercase font-mono">Current Subject</span>
+                        <strong class="text-xs text-slate-700 font-bold block bg-slate-100 px-2 py-0.5 rounded border">${subject}</strong>
                     </div>
                     <div class="text-right">
-                        <span class="text-xs font-bold text-slate-400">対象講義:</span>
-                        <strong class="text-xs text-slate-700 block">${subject}</strong>
+                        <span class="text-[10px] font-bold text-slate-400 block uppercase">Evaluation</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] inline-block ${badgeClass}">${badgeText}</span>
                     </div>
                 </div>
-                <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-1.5 pt-1">
+
+                <!-- 統計内訳 -->
+                <div class="grid grid-cols-5 gap-2 text-center text-xs pb-3 border-b border-dashed border-slate-200">
+                    <div class="bg-green-50 p-1.5 rounded border border-green-100">
+                        <div class="text-slate-500 text-[10px]">出席</div>
+                        <div class="font-bold font-mono text-green-700 text-sm">${counts["出席"]}</div>
+                    </div>
+                    <div class="bg-amber-50 p-1.5 rounded border border-amber-100">
+                        <div class="text-slate-500 text-[10px]">仮出席</div>
+                        <div class="font-bold font-mono text-amber-700 text-sm">${counts["仮出席"]}</div>
+                    </div>
+                    <div class="bg-yellow-50 p-1.5 rounded border border-yellow-100">
+                        <div class="text-slate-500 text-[10px]">遅刻</div>
+                        <div class="font-bold font-mono text-yellow-700 text-sm">${counts["遅刻"]}</div>
+                    </div>
+                    <div class="bg-slate-100 p-1.5 rounded border border-slate-200">
+                        <div class="text-slate-500 text-[10px]">欠席</div>
+                        <div class="font-bold font-mono text-slate-600 text-sm">${counts["欠席"]}</div>
+                    </div>
+                    <div class="bg-red-50 p-1.5 rounded border border-red-150">
+                        <div class="text-red-500 text-[10px] font-bold">不正</div>
+                        <div class="font-bold font-mono text-red-700 text-sm">${counts["不正出席"]}</div>
+                    </div>
+                </div>
+
+                <!-- プログレスバー -->
+                <div class="space-y-1 py-1">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500">
+                        <span>出席率 (全20回換算)</span>
+                        <span class="font-mono">${attendanceRate}%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div class="h-full ${attendanceRate < 60 ? 'bg-red-500' : attendanceRate < 80 ? 'bg-yellow-500' : 'bg-green-500'}" style="width: ${attendanceRate}%"></div>
+                    </div>
+                </div>
+
+                <!-- 全20回グリッド -->
+                <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-1.5 pt-2">
             `;
 
             records.forEach((status, i) => {
@@ -776,7 +875,7 @@
 
             html += `
                 </div>
-                <p class="text-[9px] text-slate-400 mt-1">※各講義回ブロックにカーソルを合わせると、該当回の学生証打刻タイムスタンプを確認できます。</p>
+                <p class="text-[9px] text-slate-400 mt-2">※各講義回ブロックにカーソルを合わせると、該当回の学生証打刻タイムスタンプを確認できます。</p>
             `;
 
             content.innerHTML = html;
@@ -795,9 +894,11 @@
             });
             document.getElementById("current-custom-subject-label").innerText = newSub;
             buildTeacherSubjectOptions();
+            buildTeacherDetailSubjectSelect(); // 🆕 個別カルテの科目セレクトにも追加を同期
             buildApplySubjectOptions();
             renderTimetable();
             document.getElementById("teacher-subject-select").value = newSub;
+            document.getElementById("teacher-detail-subject-select").value = newSub; // カルテも新規科目に合わせる
             input.value = "";
             showAlert(`⚙️ 新科目「${newSub}」を追加連動しました。`, "success");
             loadTeacherControlTable();
@@ -999,7 +1100,6 @@
             renderNotifications();
         }
 
-        // 救済申請はその日の授業のみ可能とするバリデーション
         function submitStudentApplication() {
             const subject = document.getElementById("apply-subject-select").value;
             const reason = document.getElementById("apply-reason").value.trim();
@@ -1034,7 +1134,7 @@
             });
 
             if (!scheduledOnSimDay) {
-                showAlert(`提出エラー: 「${subject}」は${correctDayName}の講義です。救済申請は該当授業 of 当日（本日）のみしか提出できません。`, "error");
+                showAlert(`提出エラー: 「${subject}」は${correctDayName}の講義です。救済申請は該当授業の当日（本日）のみしか提出できません。`, "error");
                 return;
             }
 
@@ -1046,7 +1146,6 @@
             renderNotifications(); 
         }
 
-        // 教員用ポータルの仮出席者まとめレンダリング処理
         function renderTeacherTempAttendanceSummary() {
             const container = document.getElementById("teacher-temp-attendance-list");
             if (!container) return;
@@ -1219,7 +1318,7 @@
                             <div>・打刻時刻: ${email.time}</div>
                         </div>
                         <p class="text-[10px] text-red-600 font-bold leading-relaxed">
-                            ⚠️ 授業終了時、教員の指定する「対面確認」がない場合、不正出席警告の対象となります。
+                            ⚠️ 授業終了時、教員の指定する「対面確認」がない場合、不正出席警告 of 対象となります。
                         </p>
                     `;
                     personal.appendChild(mailDiv);
