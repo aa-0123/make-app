@@ -43,7 +43,7 @@
                 </button>
 
                 <div class="flex items-center space-x-2 bg-indigo-900/60 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-indigo-800 dark:border-slate-700">
-                    <span class="text-slate-300 font-medium">基準日: 2026/04/13 (月)</span>
+                    <span id="realtime-clock" class="text-slate-300 font-medium font-mono">現在日時: 読み込み中...</span>
                     <span class="text-indigo-700 dark:text-slate-600">|</span>
                     <label for="simulate-date" class="font-medium text-slate-300">シミュレーション日:</label>
                     <input type="date" id="simulate-date" value="2026-06-25" onchange="updateWeekDisplay()" class="bg-indigo-950 dark:bg-slate-900 text-white px-2 py-0.5 rounded border border-indigo-700 dark:border-slate-600 focus:outline-none focus:border-indigo-400 font-mono text-xs">
@@ -322,15 +322,16 @@
 
                     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-3.5">
                         <div class="flex items-center gap-1.5 border-b dark:border-slate-700 pb-2 text-xs font-bold text-slate-800 dark:text-white">
-                            <span>✉️</span> <h3>個別メッセージ・警告メール送信機能 (学生ポータル連動)</h3>
+                            <span>✉️</span> <h3>個別メッセージ・全体メール送信機能 (学生ポータル連動)</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                             <div class="space-y-2">
-                                <label class="block font-bold text-slate-600 dark:text-slate-400">1. 送信先学生</label>
+                                <label class="block font-bold text-slate-600 dark:text-slate-400">1. 送信先（個別または全体）</label>
                                 <select id="teacher-mail-student-select" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-semibold"></select>
                                 
                                 <label class="block font-bold text-slate-600 dark:text-slate-400 pt-1">2. テンプレート呼び出し</label>
                                 <div class="grid grid-cols-1 gap-1">
+                                    <button onclick="applyMailTemplate('announcement')" class="py-1 px-2 text-left bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-400 rounded border border-indigo-200 dark:border-indigo-900 font-bold text-[11px]">📢 講義一斉お知らせ通知</button>
                                     <button onclick="applyMailTemplate('warning')" class="py-1 px-2 text-left bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-700 dark:text-red-400 rounded border border-red-200 dark:border-red-900 font-bold text-[11px]">⚠️ 出席率低下の警告</button>
                                     <button onclick="applyMailTemplate('fraud')" class="py-1 px-2 text-left bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-700 dark:text-orange-400 rounded border border-orange-200 dark:border-orange-900 font-bold text-[11px]">🚨 不正打刻の疑い通達</button>
                                     <button onclick="applyMailTemplate('interview')" class="py-1 px-2 text-left bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-900 font-bold text-[11px]">💬 個別面談の呼び出し</button>
@@ -347,7 +348,7 @@
                                 </div>
                                 <div class="flex justify-end">
                                     <button onclick="sendTeacherCustomMail()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
-                                        個人通知メールを送信する
+                                        メールを配信する
                                     </button>
                                 </div>
                             </div>
@@ -784,11 +785,18 @@
             });
         }
 
-        // 📧 メール用宛先リストの構築
         function buildTeacherMailStudentOptions() {
             const select = document.getElementById("teacher-mail-student-select");
             if (!select) return;
             select.innerHTML = "";
+            
+            // 全員宛ての一括配信用オプションを先頭に追加
+            const allOpt = document.createElement("option");
+            allOpt.value = "ALL";
+            allOpt.innerText = "📢 【全員】一括メール・お知らせ配信";
+            allOpt.className = "font-bold text-indigo-600 dark:text-indigo-400";
+            select.appendChild(allOpt);
+
             Object.keys(studentsList).forEach(studentId => {
                 const opt = document.createElement("option");
                 opt.value = studentId;
@@ -797,22 +805,31 @@
             });
         }
 
-        // 📝 メールテンプレートの流し込み処理
         function applyMailTemplate(type) {
             const studentId = document.getElementById("teacher-mail-student-select").value;
-            const studentName = studentsList[studentId]?.name || "学生";
+            const isAll = studentId === "ALL";
+            const studentName = isAll ? "学生の皆様" : (studentsList[studentId]?.name || "学生");
             const titleInput = document.getElementById("teacher-mail-title");
             const bodyInput = document.getElementById("teacher-mail-body");
 
-            if (type === 'warning') {
-                titleInput.value = "【重要・警告】出席率低下に関する面談のお知らせ";
-                bodyInput.value = `${studentName} 様\n\n本講義の出席率が現在「単位取得基準（60%）」を下回る危険性があります。\n次回の講義開始前に、必ず教員室まで状況の報告に来てください。`;
+            if (type === 'announcement') {
+                titleInput.value = "【全体通知】次回講義に関する事前準備と持参PCの確認";
+                bodyInput.value = `学生の皆様\n\n次回の実習講義では各自の開発用PCを使用します。\n環境セットアップ資料を事前に確認し、当日はPCに不備がないよう持参してください。`;
+            } else if (type === 'warning') {
+                titleInput.value = isAll ? "【重要】現在の出席率状況についての中間警告（一斉連絡）" : "【重要・警告】出席率低下に関する面談のお知らせ";
+                bodyInput.value = isAll 
+                    ? `学生の皆様\n\n本講義の出席率が現在「単位取得基準（60%）」を下回る危険性のある学生が何名か見受けられます。\n各自のポータルから出席率（20回評価）を確認し、不安がある学生は早急に教員室まで報告に来てください。`
+                    : `${studentName} 様\n\n本講義の出席率が現在「単位取得基準（60%）」を下回る危険性があります。\n次回の講義開始前に、必ず教員室まで状況の報告に来てください。`;
             } else if (type === 'fraud') {
-                titleInput.value = "【重要】学生証タッチログと提出物の不一致について確認";
-                bodyInput.value = `${studentName} 様\n\n先日の講義において、学生証リーダーへの打刻ログが残っていますが、授業終了時の紙の出席カード（または小テスト）の提出が確認できませんでした。\n不正打刻として判定が「欠席」に上書きされる可能性があります。至急説明に来てください。`;
+                titleInput.value = isAll ? "【重要・注意喚起】学生証タッチログと提出物の不一致（不正打刻・ピ逃げ）について" : "【重要】学生証タッチログと提出物の不一致について確認";
+                bodyInput.value = isAll
+                    ? `学生の皆様\n\n一部の講義において、学生証リーダーへの擬似打刻を行った後、紙の提出物等を出さずに教室を退出する「ピ逃げ（不正出席）」の疑い事例が報告されています。\nこれらは自動突き合わせ機能により検知され、一発で「不正出席（欠席より重い減点）」判定となります。絶対に不正行為を行わないでください。`
+                    : `${studentName} 様\n\n先日の講義において、学生証リーダーへの打刻ログが残っていますが、授業終了時の紙の出席カード（または小テスト）の提出が確認できませんでした。\n不正打刻として判定が「欠席」に上書きされる可能性があります。至急説明に来てください。`;
             } else if (type === 'interview') {
-                titleInput.value = "【面談通知】PBL演習の進捗および出席確認について";
-                bodyInput.value = `${studentName} 様\n\nPBL演習および各講義の出席進捗に関して、一度個別面談を行いたいと考えています。\n今週木曜日のオフィスアワー（16:30〜）に、教員控室までお越しください。`;
+                titleInput.value = isAll ? "【全体連絡】PBL演習の最終マイルストーンおよび個別面談実施について" : "【面談通知】PBL演習の進捗および出席確認について";
+                bodyInput.value = isAll
+                    ? `学生の皆様\n\nPBL演習の進捗が思わしくないグループ、または出席状況に関して相談がある場合は、個別面談時間を設けています。\n面談を希望する代表、または個人はオフィスアワーに教員控室までお越しください。`
+                    : `${studentName} 様\n\nPBL演習および各講義の出席進捗に関して、一度個別面談を行いたいと考えています。\n今週木曜日のオフィスアワー（16:30〜）に、教員控室までお越しください。`;
             }
             showAlert("📄 選択したテンプレート文面を流し込みました。編集して送信可能です。", "success");
         }
@@ -828,19 +845,38 @@
                 return;
             }
 
-            // 学生宛通知リストへ格納
-            studentEmailsList.unshift({
-                id: Date.now(),
-                isCustomTeacherMail: true,
-                subjectName: "教員からの個別連絡",
-                mailTitle: title,
-                mailBody: body,
-                time: getSafeSimulateDate().toLocaleDateString('ja-JP') + " " + new Date().toLocaleTimeString('ja-JP'),
-                studentId: studentId,
-                studentName: studentsList[studentId].name
-            });
+            const simDate = getSafeSimulateDate();
+            const timeStr = simDate.toLocaleDateString('ja-JP') + " " + new Date().toLocaleTimeString('ja-JP');
 
-            showAlert(`📨 サクセス: ${studentsList[studentId].name} さん宛に個人通知メールを配信しました。`, "success");
+            if (studentId === "ALL") {
+                // 全員宛ての一括メール送信
+                Object.keys(studentsList).forEach(sid => {
+                    studentEmailsList.unshift({
+                        id: Date.now() + Math.random(), // ユニークID重複防止
+                        isCustomTeacherMail: true,
+                        subjectName: "教員からの全体連絡",
+                        mailTitle: title,
+                        mailBody: body,
+                        time: timeStr,
+                        studentId: sid,
+                        studentName: studentsList[sid].name
+                    });
+                });
+                showAlert(`📢 全体配信完了: 登録学生全員宛てに一括でお知らせメールを配信しました。`, "success");
+            } else {
+                // 個別送信
+                studentEmailsList.unshift({
+                    id: Date.now(),
+                    isCustomTeacherMail: true,
+                    subjectName: "教員からの個別連絡",
+                    mailTitle: title,
+                    mailBody: body,
+                    time: timeStr,
+                    studentId: studentId,
+                    studentName: studentsList[studentId].name
+                });
+                showAlert(`📨 個別配信完了: ${studentsList[studentId].name} さん宛に個人通知メールを配信しました。`, "success");
+            }
             
             // 入力欄をクリア
             document.getElementById("teacher-mail-title").value = "";
@@ -1406,8 +1442,28 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function updateRealtimeClock() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const w = ["日", "月", "火", "水", "木", "金", "土"][now.getDay()];
+            const hrs = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const secs = String(now.getSeconds()).padStart(2, '0');
+            
+            const clockEl = document.getElementById("realtime-clock");
+            if (clockEl) {
+                clockEl.innerText = `現在日時: ${y}/${m}/${d} (${w}) ${hrs}:${mins}:${secs}`;
+            }
+        }
+
         function closeAlert() { document.getElementById("alert-banner").classList.add("hidden"); }
-        window.onload = function() { updateWeekDisplay(); };
+        window.onload = function() { 
+            updateWeekDisplay(); 
+            updateRealtimeClock();
+            setInterval(updateRealtimeClock, 1000); // 1秒ごとに現在日時を更新
+        };
     </script>
 </body>
 </html>
