@@ -46,7 +46,7 @@
                     <span id="realtime-clock" class="text-slate-300 font-medium font-mono">現在日時: 読み込み中...</span>
                     <span class="text-indigo-700 dark:text-slate-600">|</span>
                     <label for="simulate-date" class="font-medium text-slate-300">シミュレーション日:</label>
-                    <input type="date" id="simulate-date" value="2026-06-25" onchange="updateWeekDisplay()" class="bg-indigo-950 dark:bg-slate-900 text-white px-2 py-0.5 rounded border border-indigo-700 dark:border-slate-600 focus:outline-none focus:border-indigo-400 font-mono text-xs">
+                    <input type="date" id="simulate-date" value="" onchange="updateWeekDisplay()" class="bg-indigo-950 dark:bg-slate-900 text-white px-2 py-0.5 rounded border border-indigo-700 dark:border-slate-600 focus:outline-none focus:border-indigo-400 font-mono text-xs">
                     <span id="week-display" class="bg-amber-500 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
                 </div>
             </div>
@@ -122,7 +122,7 @@
                 <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-3.5 rounded-xl flex items-start gap-2.5">
                     <span class="text-sm mt-0.5">💡</span>
                     <div class="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
-                        授業の打刻を行うには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
+                        授業の打刻を行うするには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
                     </div>
                 </div>
 
@@ -719,7 +719,7 @@
 
             if (role === "student") {
                 btnStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-slate-700 flex justify-center items-center gap-1.5";
-                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-1.5";
+                btnTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-center items-center gap-1.5";
                 pStudent.classList.remove("hidden");
                 pTeacher.classList.add("hidden");
                 updateStudentView();
@@ -1459,7 +1459,16 @@
         }
 
         function closeAlert() { document.getElementById("alert-banner").classList.add("hidden"); }
+        
         window.onload = function() { 
+            // 🚀 【今回の修正】初期の「シミュレーション日」入力を本日の日付に完全自動同期
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+            document.getElementById("simulate-date").value = todayStr;
+
             updateWeekDisplay(); 
             updateRealtimeClock();
             setInterval(updateRealtimeClock, 1000); // 1秒ごとに現在日時を更新
