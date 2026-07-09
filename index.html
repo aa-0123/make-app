@@ -120,7 +120,7 @@
                 <div class="bg-indigo-50/50 border border-indigo-100 p-3.5 rounded-xl flex items-start gap-2.5">
                     <span class="text-sm mt-0.5">💡</span>
                     <div class="text-xs text-indigo-950 leading-relaxed">
-                        授業の打刻を行うには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
+                        授業の打刻を行うするには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
                     </div>
                 </div>
 
@@ -133,7 +133,7 @@
                             </span>
                             <span class="text-[11px] text-slate-400 flex items-center gap-1">
                                 <span>設定を開く</span>
-                                <span class="transition-transform duration-200 inline-block group-open:rotate-180">▼</span>
+                                <span class="transition-transform duration-205 inline-block group-open:rotate-180">▼</span>
                             </span>
                         </summary>
                         <div class="mt-3 space-y-3 pt-3 border-t border-slate-200">
@@ -328,7 +328,7 @@
                         </div>
                     </div>
 
-                    <!-- 👤 個別学生カルテ / 出席詳細確認パネル -->
+                    <!-- 👤 個別学生カルテ / 出席詳細確認パネル (バグ修正箇所：学生と科目のセレクトボックスを完備) -->
                     <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3.5">
                         <div class="flex items-center justify-between border-b pb-2">
                             <div class="flex items-center gap-2">
@@ -439,14 +439,6 @@
 
                             <div class="overflow-x-auto bg-white rounded-lg border border-slate-200">
                                 <table class="w-full">
-                                    <thead class="bg-slate-50 text-slate-500 font-semibold border-b text-[11px]">
-                                        <tr>
-                                            <th class="p-3 text-left">学籍番号</th>
-                                            <th class="p-3 text-left">名前</th>
-                                            <th class="p-3 text-left">学生証打刻状況</th>
-                                            <th class="p-3 text-left">判定結果</th>
-                                        </tr>
-                                    </thead>
                                     <tbody id="teacher-control-tbody" class="divide-y divide-slate-150 text-[11px]"></tbody>
                                 </table>
                             </div>
@@ -487,7 +479,7 @@
         ];
 
         let subjects = [
-            '英語Ⅰ', '応用情報', '情報数理', 'プロミング', 
+            '英語Ⅰ', '応用情報', '情報数理', 'プログラミング', 
             '物理学基礎', 'キャリア', '離散数学', 'ソフトウェア', 
             '英語表現', '工学概論', 'データベース', 'PBL演習', 'データ構造'
         ];
@@ -733,6 +725,7 @@
             });
         }
 
+        // 👨‍🏫 カルテ専用の個別選択セレクトボックスの構築
         function buildTeacherDetailOptions() {
             const selectStudent = document.getElementById("teacher-detail-student-select");
             selectStudent.innerHTML = "";
@@ -749,11 +742,12 @@
                 const opt = document.createElement("option");
                 opt.value = sub;
                 opt.innerText = sub;
+                if(sub === "ソフトウェア") opt.selected = true;
                 selectSubject.appendChild(opt);
             });
         }
 
-        // 📊 改良：個別学生カルテ(出力状況詳細)の描画
+        // 📊 個別学生カルテ(出力状況詳細)の描画 (学生・科目の両方をしっかり同期して再描画します)
         function renderStudentDetailCard() {
             const studentId = document.getElementById("teacher-detail-student-select").value;
             const subject = document.getElementById("teacher-detail-subject-select").value;
