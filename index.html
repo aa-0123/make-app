@@ -115,7 +115,7 @@
                         <span>ℹ️</span> 学生用の案内
                     </h2>
                     <p class="text-xs text-indigo-700 mt-1 leading-relaxed">
-                        学生は自分で最終出席の編集はできません。時間割の科目を選択し、右側の詳細パネルから<strong>「学生証をタッチする」</strong>ことで自動的にその講義が<strong>「仮出席」</strong>（オレンジ色）状態になり、確認メールがあなた宛ての連絡事項に届きます。なお、不携帯救済申請は、<strong>該当講義の当日のみ</strong>申請可能です。(本授業プログラムは全20回仕様に拡張されています)
+                        学生は自分で最終出席の編集はできません。時間割の科目を選択し、右側の詳細パネルから<strong>「学生証をタッチする」</strong>ことで自動的にその講義が<strong>「仮出席」</strong>（オレンジ色）状態になり、確認メールがあなた宛ての連絡事項に届きます。なお、不携帯救済申請は、<strong>該当講義の当日のみ</strong>申請可能です。
                     </p>
                 </div>
 
@@ -147,7 +147,6 @@
                                         </tr>
                                     </thead>
                                     <tbody id="settings-timetable-tbody">
-                                        <!-- JSで時間割設定用入力フォームを生成 -->
                                     </tbody>
                                 </table>
                             </div>
@@ -325,7 +324,7 @@
                         </div>
                     </div>
 
-                    <!-- 📊 新設：科目別トータル出席統計サマリー (全20回) -->
+                    <!-- 📊 科目別トータル出席統計サマリー (全20回) -->
                     <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
                         <div class="flex justify-between items-center border-b pb-2">
                             <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -349,9 +348,29 @@
                                     </tr>
                                 </thead>
                                 <tbody id="teacher-summary-dashboard-tbody" class="divide-y text-slate-700">
-                                    <!-- JSで学生別のトータル集計結果を動的に生成 -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- 👥 新設：個別学生カルテ / 詳細出席検索パネル (ご要望機能) -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 border-b pb-2">
+                            <span class="text-xl">👤</span>
+                            <h3 class="font-bold text-slate-800 text-sm">個別学生カルテ（出席状況の個別出力・詳細確認）</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-1.5">学生を選択 (学籍番号または名前)</label>
+                                <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2.5 text-xs bg-white border border-slate-300 rounded-lg w-full font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <!-- JSで動的に登録学生を生成 -->
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div id="student-detail-card-content" class="space-y-4">
+                                    <!-- JSで選択学生の全20回分のステータスをグリッド出力 -->
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -372,9 +391,8 @@
                                     <h3 class="font-bold text-slate-800 text-sm">🔄 科目別・20回出席手動コントロール</h3>
                                 </div>
                                 <div class="flex gap-2">
-                                    <select id="teacher-subject-select" onchange="loadTeacherControlTable()" class="p-1.5 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700"></select>
+                                    <select id="teacher-subject-select" onchange="loadTeacherControlTable(); renderTeacherSummaryDashboard(); renderStudentDetailCard();" class="p-1.5 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700"></select>
                                     <select id="teacher-lecture-round" onchange="loadTeacherControlTable()" class="p-1.5 text-xs bg-white border border-slate-300 rounded font-semibold text-slate-700">
-                                        <!-- JSで20回分生成 -->
                                     </select>
                                 </div>
                             </div>
@@ -446,7 +464,7 @@
                                 </table>
                             </div>
                             <button onclick="saveTeacherOverride()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-lg transition shadow">
-                                この講義回の判定を確定・上書き登録する
+                                この講義回の判定を確定・一括保存する
                             </button>
                         </div>
 
@@ -709,12 +727,15 @@
             }
             document.getElementById("teacher-lock-screen").classList.add("hidden");
             document.getElementById("teacher-unlocked-content").classList.remove("hidden");
+            
             buildTeacherSubjectOptions();
-            buildTeacherRoundOptions(); // 全20回対応セレクト生成
+            buildTeacherRoundOptions(); 
+            buildTeacherDetailStudentSelect(); // 新設：個別詳細確認用の学生リスト同期
             loadTeacherControlTable();
             loadTeacherApplications();
             renderTeacherTempAttendanceSummary();
-            renderTeacherSummaryDashboard(); // 統計サマリーの描画
+            renderTeacherSummaryDashboard(); 
+            renderStudentDetailCard(); // 新設：初期カード描画
         }
 
         function buildTeacherSubjectOptions() {
@@ -727,6 +748,68 @@
                 if(sub === prev) opt.selected = true;
                 select.appendChild(opt);
             });
+        }
+
+        // 🆕 新設：個別詳細確認セレクトの組み立て
+        function buildTeacherDetailStudentSelect() {
+            const select = document.getElementById("teacher-detail-student-select");
+            select.innerHTML = "";
+            Object.keys(studentsList).forEach(studentId => {
+                const opt = document.createElement("option");
+                opt.value = studentId;
+                opt.innerText = `${studentId} - ${studentsList[studentId].name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        // 🆕 新設：選択された個別学生の全20回分の出席詳細を美しくカード出力
+        function renderStudentDetailCard() {
+            const studentId = document.getElementById("teacher-detail-student-select").value;
+            const subject = document.getElementById("teacher-subject-select").value;
+            const content = document.getElementById("student-detail-card-content");
+            if (!studentId || !content) return;
+
+            const name = studentsList[studentId].name;
+            const records = globalAttendanceData[studentId][subject] || Array(20).fill("欠席");
+            
+            let html = `
+                <div class="flex justify-between items-center flex-wrap gap-2 border-b pb-2">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400">対象学生:</span>
+                        <strong class="text-sm text-indigo-900 block font-bold">${studentId} - ${name}</strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold text-slate-400">対象講義:</span>
+                        <strong class="text-xs text-slate-700 block">${subject}</strong>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-1.5 pt-1">
+            `;
+
+            records.forEach((status, i) => {
+                let colorClass = "bg-slate-100 text-slate-400 border border-slate-200";
+                if (status === "出席") colorClass = "bg-green-100 text-green-800 font-bold border border-green-200";
+                if (status === "仮出席") colorClass = "bg-amber-100 text-amber-800 font-bold border border-amber-300 animate-pulse";
+                if (status === "遅刻") colorClass = "bg-yellow-100 text-yellow-800 font-bold border border-yellow-300";
+                if (status === "公欠") colorClass = "bg-purple-100 text-purple-800 font-bold border border-purple-200";
+                if (status === "不正出席") colorClass = "bg-red-100 text-red-800 font-bold border border-red-300 animate-pulse";
+
+                const logTime = studentsList[studentId]?.touchLog[i] || "-";
+
+                html += `
+                    <div class="p-1 rounded text-center ${colorClass} text-[10px] cursor-help relative group" title="打刻ログ: ${logTime}">
+                        <div class="opacity-75">第 ${i+1} 回</div>
+                        <div class="text-[9px] truncate">${status}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+                <p class="text-[9px] text-slate-400 mt-1">※各講義回ブロックにカーソルを合わせると、該当回の学生証打刻タイムスタンプを確認できます。</p>
+            `;
+
+            content.innerHTML = html;
         }
 
         function addNewSubject() {
@@ -750,6 +833,7 @@
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
             renderTeacherSummaryDashboard();
+            renderStudentDetailCard();
         }
 
         function applyCustomRule() {
@@ -791,6 +875,7 @@
                 loadTeacherControlTable();
                 renderTeacherTempAttendanceSummary();
                 renderTeacherSummaryDashboard();
+                renderStudentDetailCard();
                 renderNotifications();
             });
         }
@@ -807,6 +892,7 @@
                 loadTeacherControlTable();
                 renderTeacherTempAttendanceSummary();
                 renderTeacherSummaryDashboard();
+                renderStudentDetailCard();
                 renderNotifications();
             });
         }
@@ -843,6 +929,7 @@
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
             renderTeacherSummaryDashboard();
+            renderStudentDetailCard();
             renderNotifications();
         }
 
@@ -871,7 +958,7 @@
             loadTeacherControlTable();
         }
 
-        // 📊 新設：教員用の各学生の「トータル出席サマリー (全20回)」集計・描画ロジック
+        // 📊 科目別トータル出席分析サマリー (全20回) 集計・描画
         function renderTeacherSummaryDashboard() {
             const subject = document.getElementById("teacher-subject-select").value;
             const tbody = document.getElementById("teacher-summary-dashboard-tbody");
@@ -889,12 +976,10 @@
                     }
                 });
 
-                // 出席率の計算: (出席数 + 公欠数 + 遅刻数*0.7) / 全20回
                 const attendanceScore = counts["出席"] + counts["公欠"] + (counts["遅刻"] * 0.7);
                 const rawRate = (attendanceScore / 20) * 100;
                 const attendanceRate = Math.min(100, Math.round(rawRate));
 
-                // 警告判定：出席率 60% 未満、または欠席が 9回以上の場合は「単位危険」
                 let badgeClass = "bg-green-100 text-green-800";
                 let badgeText = "順調 (良好)";
                 
@@ -989,7 +1074,7 @@
             }
             const now = new Date();
             const diffDays = Math.floor((now - BASE_DATE) / (1000 * 60 * 60 * 24));
-            const round = Math.max(0, Math.min(19, Math.floor(diffDays / 7))); // 最大20回(インデックス19)に拡張
+            const round = Math.max(0, Math.min(19, Math.floor(diffDays / 7))); 
             const subject = document.getElementById("student-panel-title").dataset.subject;
 
             studentsList[authenticatedStudentId].touchLog[round] = now.toLocaleTimeString();
@@ -1058,6 +1143,54 @@
             renderNotifications(); 
         }
 
+        // 教員用ポータルの仮出席者まとめレンダリング処理
+        function renderTeacherTempAttendanceSummary() {
+            const container = document.getElementById("teacher-temp-attendance-list");
+            if (!container) return;
+            container.innerHTML = "";
+
+            let tempList = [];
+            Object.keys(globalAttendanceData).forEach(studentId => {
+                Object.keys(globalAttendanceData[studentId]).forEach(subject => {
+                    globalAttendanceData[studentId][subject].forEach((status, i) => {
+                        if (status === "仮出席") {
+                            const touchTime = studentsList[studentId]?.touchLog[i] || "打刻記録あり";
+                            tempList.push({
+                                studentId: studentId,
+                                name: studentsList[studentId]?.name || "学生",
+                                subject: subject,
+                                round: i + 1,
+                                touchTime: touchTime
+                            });
+                        }
+                    });
+                });
+            });
+
+            if (tempList.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-400 py-3 col-span-full">現在、仮出席状態の学生はいません。</div>`;
+                return;
+            }
+
+            tempList.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "bg-amber-100/60 border border-amber-300 rounded-lg p-3 text-xs space-y-2 flex flex-col justify-between";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center font-bold text-amber-950">
+                        <span>学籍: ${item.studentId} (${item.name})</span>
+                        <span class="bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded text-[10px]">仮出席中</span>
+                    </div>
+                    <div class="text-slate-700">
+                        講義: <strong class="text-indigo-900">${item.subject}</strong> (第 ${item.round} 回)
+                    </div>
+                    <div class="text-[10px] text-slate-500">
+                        打刻時間: ${item.touchTime}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         function loadTeacherControlTable() {
             const subject = document.getElementById("teacher-subject-select").value;
             const round = parseInt(document.getElementById("teacher-lecture-round").value);
@@ -1118,7 +1251,8 @@
             showAlert("💾 出席判定を上書き一括確定しました。", "success");
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
-            renderTeacherSummaryDashboard(); // 確定後に分析ダッシュボードも更新
+            renderTeacherSummaryDashboard(); 
+            renderStudentDetailCard(); // 個別カルテカードも再計算して同期
             renderNotifications(); 
         }
 
@@ -1158,7 +1292,8 @@
             loadTeacherApplications();
             loadTeacherControlTable();
             renderTeacherTempAttendanceSummary();
-            renderTeacherSummaryDashboard(); // 承認後にダッシュボードを再計算
+            renderTeacherSummaryDashboard(); 
+            renderStudentDetailCard(); // 申請反映時に動的同期
             renderNotifications(); 
         }
 
