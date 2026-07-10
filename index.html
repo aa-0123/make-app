@@ -127,7 +127,7 @@
                     <div id="student-only-fields" class="space-y-3">
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学籍番号</label>
-                            <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
+                            <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold font-mono">
                         </div>
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学生証の左下番号</label>
@@ -139,7 +139,7 @@
                     <div id="teacher-only-fields" class="space-y-3 hidden">
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">教員番号（ID）</label>
-                            <input type="text" id="auth-teacher-id" placeholder="例: T01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
+                            <input type="text" id="auth-teacher-id" placeholder="例: T01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold font-mono">
                         </div>
                     </div>
 
@@ -162,10 +162,27 @@
 
             <!-- 👤 学生ポータル -->
             <div id="portal-student" class="fade-in space-y-6">
+                <!-- 教員専用：閲覧学生切り替えセレクター (教員ログイン時のみ表示) -->
+                <div id="teacher-student-selector-panel" class="hidden bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/20 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-500 text-sm">👁️</span>
+                        <div>
+                            <span class="font-bold text-amber-800 dark:text-amber-400 block">教員マスター閲覧モード (デモ・テスト用)</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">学生側の視点や通知をテスト確認できます。閲覧対象の学生を切り替えてください。</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="font-bold text-slate-600 dark:text-slate-400">表示するダミー生徒:</label>
+                        <select id="teacher-view-student-select" onchange="selectViewingStudentForTeacher(this.value)" class="p-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
+                            <!-- JavaScriptで動的生成 -->
+                        </select>
+                    </div>
+                </div>
+
                 <div class="bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900 p-3.5 rounded-xl flex items-start gap-2.5">
                     <span class="text-sm mt-0.5">💡</span>
                     <div class="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed">
-                        授業の打刻を行うには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
+                        授業の打刻を行うするには、時間割から該当する<strong>講義を選択し、右側パネルから学生証をタッチ</strong>してください。打刻成功時に確認通知メールが届きます。出席救済申請は、当日実施されている授業のみ申請が可能です。
                     </div>
                 </div>
 
@@ -231,7 +248,10 @@
                         <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">具体的な不携帯・打刻忘れ理由</label>
                         <textarea id="apply-reason" rows="2" placeholder="（例）自宅にカードケースを忘れてしまったため。授業最後に紙の出席カードを提出済です。" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"></textarea>
                     </div>
-                    <button onclick="submitStudentApplication()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition">
+                    <div id="application-restriction-message" class="hidden text-[11px] text-amber-600 dark:text-amber-400 font-bold">
+                        ⚠️ 閲覧モード中：教員マスターのアカウントでは救済申請フォームを送信できません（閲覧・確認専用）。
+                    </div>
+                    <button id="submit-application-btn" onclick="submitStudentApplication()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition">
                         出席救済申請を教員へ提出する
                     </button>
                 </div>
@@ -242,7 +262,7 @@
                         <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-1.5">
                             <span>📅</span> 履修時間割と出席進捗
                         </h3>
-                        <div class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full font-bold">
+                        <div class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full font-bold font-mono">
                             ユーザー: <span id="student-viewing-label">S01</span>
                         </div>
                     </div>
@@ -276,8 +296,11 @@
                                         <span>💳</span> 学生証のカードタッチ（擬似打刻）
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="text" id="panel-card-number" placeholder="学生証左下番号" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
+                                        <input type="text" id="panel-card-number" placeholder="学生証左下番号" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500 font-mono">
                                         <input type="password" id="panel-password" placeholder="パスワード" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
+                                    </div>
+                                    <div id="panel-autofill-info" class="hidden text-[10px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/5 p-1 rounded">
+                                        💡 デモ用自動入力: カード [<span id="autofill-card-num" class="font-mono">-</span>] / パス [<span id="autofill-pass-num" class="font-mono">-</span>]
                                     </div>
                                     <button onclick="executeStudentTouchFromPanel()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] transition">
                                         学生証をタッチする
@@ -288,7 +311,7 @@
                             </div>
 
                             <div id="student-attendance-summary" class="hidden text-center py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-bold text-xs text-indigo-950 dark:text-indigo-300 mt-3 shadow-sm">
-                                出席確定数: <span id="student-summary-count" class="text-sm text-indigo-600 dark:text-indigo-400">0</span> / 20 回
+                                出席確定数: <span id="student-summary-count" class="text-sm text-indigo-600 dark:text-indigo-400 font-mono">0</span> / 20 回
                             </div>
                         </div>
                     </div>
@@ -357,7 +380,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
                             <div class="space-y-2">
                                 <label class="block font-bold text-slate-600 dark:text-slate-400">1. 送信先（個別または全体）</label>
-                                <select id="teacher-mail-student-select" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-semibold"></select>
+                                <select id="teacher-mail-student-select" class="w-full p-2 bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-lg text-slate-800 dark:text-white font-semibold font-mono"></select>
                                 
                                 <label class="block font-bold text-slate-600 dark:text-slate-400 pt-1">2. テンプレート呼び出し</label>
                                 <div class="grid grid-cols-1 gap-1">
@@ -398,7 +421,7 @@
                             <div class="space-y-3.5 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
                                 <div>
                                     <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1.5">学生を選択</label>
-                                    <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg w-full font-semibold text-slate-700 dark:text-slate-300 focus:outline-none text-xs">
+                                    <select id="teacher-detail-student-select" onchange="renderStudentDetailCard()" class="p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg w-full font-semibold text-slate-700 dark:text-slate-300 focus:outline-none text-xs font-mono">
                                     </select>
                                 </div>
                                 <div>
@@ -465,7 +488,7 @@
                                     <span>👤</span> 個別出席ステータスの直接書き換え
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    <input type="text" id="manual-student-id" placeholder="学籍番号を入力 (例: S01)" class="p-2 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-white w-full">
+                                    <input type="text" id="manual-student-id" placeholder="学籍番号を入力 (例: S01)" class="p-2 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-white w-full font-mono">
                                     <select id="manual-student-status" class="p-2 border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-full font-semibold">
                                         <option value="出席">出席</option>
                                         <option value="仮出席">仮出席</option>
@@ -516,9 +539,9 @@
     <script>
         // --- データベース定義 (メモリ) ---
         const studentsList = {
-            "S01": { name: "田中 太郎", card: "987654321", touchLog: { 7: "09:02:14" }, password: "" },
-            "S02": { name: "佐藤 花子", card: "111222333", touchLog: {}, password: "" },
-            "S03": { name: "鈴木 一郎", card: "444555666", touchLog: {}, password: "" }
+            "S01": { name: "田中 太郎", card: "987654321", touchLog: { 7: "09:02:14" }, password: "123" },
+            "S02": { name: "佐藤 花子", card: "111222333", touchLog: {}, password: "123" },
+            "S03": { name: "鈴木 一郎", card: "444555666", touchLog: {}, password: "123" }
         };
 
         const teachersList = {
@@ -680,8 +703,9 @@
 
             authenticatedStudentId = studentId;
 
-            // 通常学生権限のため、教員用タブを非表示に
+            // 通常学生権限のため、教員用タブおよびデモ学生セレクターを非表示に
             document.getElementById("portal-tabs").classList.add("hidden");
+            document.getElementById("teacher-student-selector-panel").classList.add("hidden");
 
             // 個人宛項目へのアサイン
             document.getElementById("apply-student-display-name").value = `${studentId} - ${studentsList[studentId].name}`;
@@ -714,13 +738,15 @@
                 teachersList[teacherId].password = inputPassword;
             }
 
-            // マスター権限として、ダミーで学生 "S01" を確認用学生としてアサイン可能に
+            // マスター権限として、ダミー学生 "S01" を最初の表示対象に
             authenticatedStudentId = "S01";
 
-            // マスター権限のためポータルタブを解放
+            // マスター権限のためポータルタブおよびデモ学生セレクターを解放
             document.getElementById("portal-tabs").classList.remove("hidden");
+            document.getElementById("teacher-student-selector-panel").classList.remove("hidden");
 
-            document.getElementById("apply-student-display-name").value = `S01 - 田中 太郎 (教員マスター代理)`;
+            // デモ学生ドロップダウンの構築
+            buildTeacherViewStudentSelect();
 
             // 画面表示
             document.getElementById("auth-screen").classList.add("hidden");
@@ -746,10 +772,31 @@
             switchPortal("teacher");
         }
 
+        // 閲覧モード時のダミー学生セレクター構築
+        function buildTeacherViewStudentSelect() {
+            const select = document.getElementById("teacher-view-student-select");
+            select.innerHTML = "";
+            Object.keys(studentsList).forEach(studentId => {
+                const opt = document.createElement("option");
+                opt.value = studentId;
+                opt.innerText = `${studentId} - ${studentsList[studentId].name}`;
+                if (studentId === authenticatedStudentId) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // 教員が閲覧学生を切り替えた時のイベント
+        function selectViewingStudentForTeacher(studentId) {
+            authenticatedStudentId = studentId;
+            showAlert(`👀 閲覧デモ対象を「${studentId} - ${studentsList[studentId].name}」に変更しました。`, "success");
+            updateStudentView();
+        }
+
         // 🚪 ログアウト
         function logout() {
             authenticatedStudentId = "";
             document.getElementById("portal-tabs").classList.add("hidden");
+            document.getElementById("teacher-student-selector-panel").classList.add("hidden");
             document.getElementById("main-dashboard").classList.add("hidden");
             document.getElementById("logout-btn").classList.add("hidden");
             document.getElementById("auth-screen").classList.remove("hidden");
@@ -771,6 +818,12 @@
                 tabTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5";
                 portalStudent.classList.remove("hidden");
                 portalTeacher.classList.add("hidden");
+
+                // 教員がログインしている場合は閲覧用のセレクターを表示する
+                const isTeacher = document.getElementById("portal-tabs").classList.contains("hidden") === false;
+                if (isTeacher) {
+                    document.getElementById("teacher-student-selector-panel").classList.remove("hidden");
+                }
                 updateStudentView();
             } else {
                 tabTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5";
@@ -1008,7 +1061,7 @@
                         studentName: studentsList[sid].name
                     });
                 });
-                showAlert(`📢 全体配信完了: 登録学生全員宛てに一括でお知らせメールを配信しました。`, "success");
+                showAlert("📢 全体配信完了: 登録学生全員宛てに一括でお知らせメールを配信しました。", "success");
             } else {
                 studentEmailsList.unshift({
                     id: Date.now(),
@@ -1263,6 +1316,37 @@
         function updateStudentView() {
             if (!authenticatedStudentId) return;
             document.getElementById("student-viewing-label").innerText = authenticatedStudentId;
+            document.getElementById("apply-student-display-name").value = `${authenticatedStudentId} - ${studentsList[authenticatedStudentId].name}`;
+
+            // デモカードタッチのプレースホルダー・自動補助
+            const studentInfo = studentsList[authenticatedStudentId];
+            document.getElementById("panel-card-number").placeholder = `学生証番号 (デモ: ${studentInfo.card})`;
+            document.getElementById("panel-password").placeholder = `パスワード (デモ: ${studentInfo.password || '123'})`;
+            
+            // 教員ログイン状態か判定
+            const isTeacherLoggedIn = !document.getElementById("portal-tabs").classList.contains("hidden");
+            const applyBtn = document.getElementById("submit-application-btn");
+            const restrictMsg = document.getElementById("application-restriction-message");
+            const autofillPanel = document.getElementById("panel-autofill-info");
+
+            if (isTeacherLoggedIn) {
+                // 救済申請の制限 (閲覧用)
+                applyBtn.disabled = true;
+                applyBtn.className = "w-full py-2.5 bg-slate-300 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-bold rounded-lg cursor-not-allowed transition";
+                restrictMsg.classList.remove("hidden");
+                
+                // 打刻補助テキストの表示
+                autofillPanel.classList.remove("hidden");
+                document.getElementById("autofill-card-num").innerText = studentInfo.card;
+                document.getElementById("autofill-pass-num").innerText = studentInfo.password || "123";
+            } else {
+                // 通常一般学生ログイン時
+                applyBtn.disabled = false;
+                applyBtn.className = "w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition";
+                restrictMsg.classList.add("hidden");
+                autofillPanel.classList.add("hidden");
+            }
+
             subjects.forEach(subject => {
                 const records = globalAttendanceData[authenticatedStudentId][subject] || [];
                 let count = records.filter(s => ["出席","公欠","遅刻","仮出席"].includes(s)).length;
