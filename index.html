@@ -50,7 +50,7 @@
                     <span class="text-indigo-700 dark:text-slate-600">|</span>
                     <label for="simulate-date" class="font-medium text-slate-300">シミュレーション日:</label>
                     <input type="date" id="simulate-date" value="" onchange="updateWeekDisplay()" class="bg-indigo-950 dark:bg-slate-900 text-white px-2 py-0.5 rounded border border-indigo-700 dark:border-slate-600 focus:outline-none focus:border-indigo-400 font-mono text-xs">
-                    <span id="week-display" class="bg-amber-500 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
+                    <span id="week-display" class="bg-amber-50 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
                 </div>
 
                 <!-- 🚪 ログアウトボタン (サインイン後表示) -->
@@ -61,13 +61,13 @@
         </div>
     </header>
 
-    <!-- 2. ポータル切り替えタブ (サインイン完了まで非表示) -->
+    <!-- 2. ポータル切り替えタブ (教員ログイン完了時のみ表示、学生ログイン時は非表示) -->
     <div id="portal-tabs" class="hidden max-w-6xl mx-auto px-4 mt-6">
         <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-            <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5">
-                <span>👤</span> 学生用ポータル
+            <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5">
+                <span>👤</span> 学生用ポータル (確認)
             </button>
-            <button id="tab-teacher" onclick="switchPortal('teacher')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5">
+            <button id="tab-teacher" onclick="switchPortal('teacher')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5">
                 <span>👨‍🏫</span> 教員用管理ポータル
             </button>
         </div>
@@ -99,23 +99,23 @@
 
         <!-- 🔑 初期表示：認証・ログイン画面 -->
         <div id="auth-screen" class="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow-md border border-slate-200 dark:border-slate-700 fade-in my-8 overflow-hidden">
-            <!-- 役割切り替え用インナータブ -->
-            <div class="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-500">
-                <button id="login-tab-student" onclick="toggleLoginRole('student')" class="flex-1 py-3.5 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 text-center">
-                    👤 学生ログイン
+            <!-- 役割選択用インナータブ -->
+            <div class="flex bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                <button id="login-tab-student" onclick="setLoginRole('student')" class="flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-indigo-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400">
+                    👤 学生としてサインイン
                 </button>
-                <button id="login-tab-teacher" onclick="toggleLoginRole('teacher')" class="flex-1 py-3.5 border-b-2 border-transparent text-center">
-                    👨‍🏫 教員ログイン
+                <button id="login-tab-teacher" onclick="setLoginRole('teacher')" class="flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    👨‍🏫 教員としてサインイン
                 </button>
             </div>
 
             <div class="p-6 sm:p-8 space-y-5">
                 <div class="text-center">
-                    <div class="bg-indigo-50 dark:bg-indigo-950/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100 dark:border-indigo-900">
-                        <span id="auth-icon" class="text-2xl">🔐</span>
+                    <div id="auth-icon-container" class="bg-indigo-50 dark:bg-indigo-950/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-indigo-100 dark:border-indigo-900">
+                        <span id="auth-main-emoji" class="text-2xl">🔐</span>
                     </div>
-                    <h2 id="auth-title" class="text-base font-bold text-slate-800 dark:text-white">学生サインイン / 学生証登録</h2>
-                    <p id="auth-desc" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                    <h2 id="auth-main-title" class="text-base font-bold text-slate-800 dark:text-white">学生用ポータル 登録・サインイン</h2>
+                    <p id="auth-main-desc" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                         学籍番号と、学生証の左下番号を入力してください。<br>
                         パスワードを設定してポータルにサインインします。
                     </p>
@@ -123,41 +123,41 @@
 
                 <!-- フォーム表示エリア -->
                 <div class="space-y-4 text-xs">
-                    <!-- 学生用入力項目 -->
-                    <div id="student-login-fields" class="space-y-3">
+                    <!-- 学生専用入力エリア -->
+                    <div id="student-only-fields" class="space-y-3">
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学籍番号</label>
-                            <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
+                            <input type="text" id="auth-student-id" placeholder="例: S01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
                         </div>
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">学生証の左下番号</label>
-                            <input type="text" id="auth-card-number" placeholder="任意の数字を入力" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
+                            <input type="text" id="auth-card-number" placeholder="任意の数字を入力" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
                         </div>
                     </div>
 
-                    <!-- 教員用入力項目 (初期非表示) -->
-                    <div id="teacher-login-fields" class="space-y-3 hidden">
+                    <!-- 教員専用入力エリア (初期非表示) -->
+                    <div id="teacher-only-fields" class="space-y-3 hidden">
                         <div>
                             <label class="block font-bold text-slate-600 dark:text-slate-400 mb-1">教員番号（ID）</label>
-                            <input type="text" id="auth-teacher-id" placeholder="例: T01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
+                            <input type="text" id="auth-teacher-id" placeholder="例: T01" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
                         </div>
                     </div>
 
-                    <!-- 共通パスワード項目 -->
+                    <!-- パスワード (共通) -->
                     <div>
-                        <label id="password-label" class="block font-bold text-slate-600 dark:text-slate-400 mb-1">パスワード</label>
-                        <input type="password" id="auth-password" placeholder="任意のパスワードを入力・設定" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition">
+                        <label id="password-field-label" class="block font-bold text-slate-600 dark:text-slate-400 mb-1">パスワード設定 / 入力</label>
+                        <input type="password" id="auth-password" placeholder="任意のパスワードを入力・設定" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:bg-white dark:focus:bg-slate-850 text-slate-800 dark:text-white transition font-semibold">
                     </div>
 
                     <!-- サインインボタン -->
-                    <button id="auth-submit-btn" onclick="executeRoleLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
+                    <button onclick="executeLoginWorkflow()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition">
                         サインインしてポータルを開く
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 🔓 メインダッシュボード -->
+        <!-- 🔓 メインダッシュボード (サインイン完了まで非表示) -->
         <div id="main-dashboard" class="hidden bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
 
             <!-- 👤 学生ポータル -->
@@ -182,7 +182,7 @@
                             </span>
                         </summary>
                         <div class="mt-3 space-y-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                            <p class="text-slate-500 dark:text-slate-400">ご自身が履修している科目の時間割を入力してください。空欄にした場所は「-」として表示されます。</p>
+                            <p class="text-slate-500 dark:text-slate-400">ご自身が履修している科目の時間割を選択してください。空欄にした場所は「-」として表示されます。</p>
                             <div class="overflow-x-auto">
                                 <table class="w-full border text-center border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                                     <thead>
@@ -266,6 +266,7 @@
                             </table>
                         </div>
 
+                        <!-- 擬似カードタッチ（打刻） -->
                         <div class="bg-slate-50 dark:bg-slate-900/50 p-4 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-col justify-between min-h-[380px] text-xs">
                             <div class="space-y-4">
                                 <h4 id="student-panel-title" class="font-bold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2 flex items-center gap-1">💡 授業を選択してください</h4>
@@ -293,6 +294,7 @@
                     </div>
                 </div>
 
+                <!-- 📢 通知 / メール一覧 -->
                 <div class="border-t border-slate-100 dark:border-slate-700 pt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-2.5">
                         <div class="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-700 pb-2 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -312,7 +314,6 @@
 
             <!-- 👨‍🏫 教員用ポータル -->
             <div id="portal-teacher" class="hidden fade-in space-y-6">
-                <!-- 教員用ダッシュボード本体 -->
                 <div id="teacher-unlocked-content" class="space-y-5">
                     
                     <!-- 臨機応変カスタマイズ & ルール -->
@@ -348,6 +349,7 @@
                         </div>
                     </div>
 
+                    <!-- メッセージ送信ツール (一括対応) -->
                     <div class="bg-white border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-3.5">
                         <div class="flex items-center gap-1.5 border-b dark:border-slate-700 pb-2 text-xs font-bold text-slate-800 dark:text-white">
                             <span>✉️</span> <h3>個別メッセージ・全体メール送信機能 (学生ポータル連動)</h3>
@@ -383,6 +385,7 @@
                         </div>
                     </div>
 
+                    <!-- 個別カルテ詳細確認 -->
                     <div class="bg-white border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm space-y-3.5">
                         <div class="flex items-center justify-between border-b dark:border-slate-700 pb-2">
                             <div class="flex items-center gap-2">
@@ -415,6 +418,7 @@
                         </div>
                     </div>
 
+                    <!-- 仮出席確認リスト -->
                     <div class="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-xl p-4 shadow-sm text-xs">
                         <div class="flex items-center gap-1.5 mb-2.5 border-b border-amber-200 dark:border-amber-900 pb-2 text-amber-950 dark:text-amber-300 font-bold">
                             <span class="text-base">⚠️</span>
@@ -424,6 +428,7 @@
                         </div>
                     </div>
 
+                    <!-- 手動テーブルと救済申請審査 -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 text-xs">
                         <div class="lg:col-span-2 bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3.5">
                             <div class="flex justify-between items-center flex-wrap gap-2">
@@ -495,6 +500,7 @@
                             </button>
                         </div>
 
+                        <!-- 救済申請ボックス -->
                         <div class="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col space-y-3">
                             <h3 class="font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
                                 <span>📥</span> 届いた救済申請
@@ -535,26 +541,11 @@
         ];
 
         let globalAttendanceData = {};
-        let studentEmailsList = []; // 学生ポータルの「個人宛通知」へ表示されるメール配列
+        let studentEmailsList = []; // 学生宛メッセージ
         let activeTeacherFilter = "all"; 
         let confirmYesCallback = null; 
-
-        // ログイン中の役割・ユーザー管理
-        let loggedInRole = null; // 'student' or 'teacher'
-        let loggedInUserId = null; // 学籍番号 or 教員番号
-        let currentLoginRoleTab = "student"; // サインイン画面でのアクティブタブ 'student' or 'teacher'
-
-        // 全20週分のセレクトボックスオプションを生成
-        function buildTeacherRoundOptions() {
-            const select = document.getElementById("teacher-lecture-round");
-            select.innerHTML = "";
-            for (let r = 1; r <= 20; r++) {
-                const opt = document.createElement("option");
-                opt.value = r - 1;
-                opt.innerText = `第 ${r} 回講義`;
-                select.appendChild(opt);
-            }
-        }
+        let authenticatedStudentId = ""; 
+        let currentRoleMode = "student"; // サインイン画面での選択状態
 
         Object.keys(studentsList).forEach(studentId => {
             initStudentAttendance(studentId);
@@ -620,56 +611,56 @@
             document.getElementById("week-display").innerText = diffDays < 0 ? "開講前" : "第 " + (Math.floor(diffDays / 7) + 1) + " 週目";
         }
 
-        // サインイン画面での役割切り替えトグル
-        function toggleLoginRole(role) {
-            currentLoginRoleTab = role;
+        // --- ログイン役割の切り替え表示ロジック ---
+        function setLoginRole(role) {
+            currentRoleMode = role;
             const tabStudent = document.getElementById("login-tab-student");
             const tabTeacher = document.getElementById("login-tab-teacher");
-            const studentFields = document.getElementById("student-login-fields");
-            const teacherFields = document.getElementById("teacher-login-fields");
-            const authTitle = document.getElementById("auth-title");
-            const authDesc = document.getElementById("auth-desc");
-            const authIcon = document.getElementById("auth-icon");
-            const passwordLabel = document.getElementById("password-label");
+            const studentFields = document.getElementById("student-only-fields");
+            const teacherFields = document.getElementById("teacher-only-fields");
+            const mainEmoji = document.getElementById("auth-main-emoji");
+            const mainTitle = document.getElementById("auth-main-title");
+            const mainDesc = document.getElementById("auth-main-desc");
+            const passLabel = document.getElementById("password-field-label");
 
-            // パスワードなどの入力値をリセット
-            document.getElementById("auth-password").value = "";
+            // 入力値をクリア
             document.getElementById("auth-student-id").value = "";
             document.getElementById("auth-card-number").value = "";
             document.getElementById("auth-teacher-id").value = "";
+            document.getElementById("auth-password").value = "";
 
             if (role === "student") {
-                tabStudent.className = "flex-1 py-3.5 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 text-center";
-                tabTeacher.className = "flex-1 py-3.5 border-b-2 border-transparent text-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition";
+                tabStudent.className = "flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-indigo-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400";
+                tabTeacher.className = "flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition";
                 studentFields.classList.remove("hidden");
                 teacherFields.classList.add("hidden");
-                authIcon.innerText = "🔐";
-                authTitle.innerText = "学生サインイン / 学生証登録";
-                authDesc.innerHTML = "学籍番号と、学生証の左下番号を入力してください。<br>パスワードを設定してポータルにサインインします。";
-                passwordLabel.innerText = "パスワード設定 / 入力";
+                mainEmoji.innerText = "🔐";
+                mainTitle.innerText = "学生用ポータル 登録・サインイン";
+                mainDesc.innerHTML = "学籍番号と、学生証の左下番号を入力してください。<br>パスワードを設定してポータルにサインインします。";
+                passLabel.innerText = "パスワード設定 / 入力";
             } else {
-                tabTeacher.className = "flex-1 py-3.5 border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 text-center";
-                tabStudent.className = "flex-1 py-3.5 border-b-2 border-transparent text-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition";
+                tabTeacher.className = "flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-indigo-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400";
+                tabStudent.className = "flex-1 py-3.5 text-center text-xs font-bold border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition";
                 studentFields.classList.add("hidden");
                 teacherFields.classList.remove("hidden");
-                authIcon.innerText = "👨‍🏫";
-                authTitle.innerText = "教員用サインイン";
-                authDesc.innerHTML = "教員番号（ID）と、設定したパスワードを入力してください。<br>（初回登録時は任意のパスワードを設定します）";
-                passwordLabel.innerText = "パスワード";
+                mainEmoji.innerText = "👨‍🏫";
+                mainTitle.innerText = "教員用ポータル 管理サインイン";
+                mainDesc.innerHTML = "教員IDを入力してください。<br>任意のパスワードを設定して管理ポータルへ入ります。";
+                passLabel.innerText = "教員パスワード";
             }
         }
 
-        // 共通ログイン実行分岐
-        function executeRoleLogin() {
-            if (currentLoginRoleTab === "student") {
-                registerAndAuthenticate();
+        // ログイン処理開始
+        function executeLoginWorkflow() {
+            if (currentRoleMode === "student") {
+                registerAndAuthenticateStudent();
             } else {
-                authenticateTeacherFromGate();
+                authenticateTeacher();
             }
         }
 
         // 学生ログイン
-        function registerAndAuthenticate() {
+        function registerAndAuthenticateStudent() {
             const studentId = document.getElementById("auth-student-id").value.trim();
             const inputCard = document.getElementById("auth-card-number").value.trim();
             const inputPassword = document.getElementById("auth-password").value.trim();
@@ -688,56 +679,60 @@
             }
 
             authenticatedStudentId = studentId;
-            loggedInRole = "student";
-            loggedInUserId = studentId;
 
+            // 通常学生権限のため、教員用タブを非表示に
+            document.getElementById("portal-tabs").classList.add("hidden");
+
+            // 個人宛項目へのアサイン
             document.getElementById("apply-student-display-name").value = `${studentId} - ${studentsList[studentId].name}`;
 
-            // 画面切り替え
+            // 画面表示
             document.getElementById("auth-screen").classList.add("hidden");
-            document.getElementById("portal-tabs").classList.remove("hidden");
             document.getElementById("main-dashboard").classList.remove("hidden");
             document.getElementById("logout-btn").classList.remove("hidden");
 
-            showAlert(`🎉 サインイン成功: 学籍番号 ${studentId} で学生ポータルにログインしました。`, "success");
+            showAlert(`🎉 学生ポータル: 学籍番号 ${studentId} でログインしました。`, "success");
             buildSettingsTimetableEditor(); 
             buildApplySubjectOptions();
             renderTimetable();
             switchPortal("student");
         }
 
-        // 教員ログイン (ログインゲートから直接アンロック)
-        function authenticateTeacherFromGate() {
+        // 教員ログイン (マスター権限)
+        function authenticateTeacher() {
             const teacherId = document.getElementById("auth-teacher-id").value.trim();
             const inputPassword = document.getElementById("auth-password").value.trim();
 
             if (!teacherId || !inputPassword) {
-                showAlert("エラー: 教員番号とパスワードを入力してください。", "error");
+                showAlert("エラー: 教員ID、および教員パスワードを入力してください。", "error");
                 return;
             }
 
-            // 新規教員登録 or パスワード認証 (任意のパスワード登録を許容する)
             if (!teachersList[teacherId]) {
                 teachersList[teacherId] = { name: "教員 " + teacherId, password: inputPassword };
-            } else if (teachersList[teacherId].password !== "" && teachersList[teacherId].password !== inputPassword) {
-                showAlert("認証エラー: パスワードが一致しません。", "error");
-                return;
             } else {
                 teachersList[teacherId].password = inputPassword;
             }
 
-            authenticatedStudentId = "S01"; // モック検証用のダミー学生同期を設定
-            loggedInRole = "teacher";
-            loggedInUserId = teacherId;
+            // マスター権限として、ダミーで学生 "S01" を確認用学生としてアサイン可能に
+            authenticatedStudentId = "S01";
 
-            // 画面切り替え
-            document.getElementById("auth-screen").classList.add("hidden");
+            // マスター権限のためポータルタブを解放
             document.getElementById("portal-tabs").classList.remove("hidden");
+
+            document.getElementById("apply-student-display-name").value = `S01 - 田中 太郎 (教員マスター代理)`;
+
+            // 画面表示
+            document.getElementById("auth-screen").classList.add("hidden");
             document.getElementById("main-dashboard").classList.remove("hidden");
             document.getElementById("logout-btn").classList.remove("hidden");
 
-            showAlert(`👨‍🏫 認証成功: 教員番号 ${teacherId} で管理ポータルにログインしました。`, "success");
-            
+            showAlert(`👨‍🏫 教員マスターポータル: 教員ID ${teacherId} でログインしました。`, "success");
+
+            buildSettingsTimetableEditor(); 
+            buildApplySubjectOptions();
+            renderTimetable();
+
             buildTeacherSubjectOptions();
             buildTeacherRoundOptions(); 
             buildTeacherDetailOptions(); 
@@ -747,26 +742,52 @@
             renderTeacherTempAttendanceSummary();
             renderStudentDetailCard();
 
-            // 鍵画面をスキップして直接アンロックコンテンツを表示
-            document.getElementById("teacher-lock-screen").classList.add("hidden");
-            document.getElementById("teacher-unlocked-content").classList.remove("hidden");
-
+            // 最初は教員ポータル画面を出す
             switchPortal("teacher");
         }
 
         // 🚪 ログアウト
         function logout() {
-            loggedInRole = null;
-            loggedInUserId = null;
             authenticatedStudentId = "";
-
             document.getElementById("portal-tabs").classList.add("hidden");
             document.getElementById("main-dashboard").classList.add("hidden");
             document.getElementById("logout-btn").classList.add("hidden");
             document.getElementById("auth-screen").classList.remove("hidden");
 
-            toggleLoginRole("student"); // 初期表示を学生にリセット
-            showAlert("🚪 ログアウトしました。サインイン画面に戻ります。", "success");
+            // 入力リセット
+            setLoginRole("student");
+            showAlert("🚪 システムからログアウトしました。", "success");
+        }
+
+        // ポータル画面切り替え
+        function switchPortal(role) {
+            const tabStudent = document.getElementById("tab-student");
+            const tabTeacher = document.getElementById("tab-teacher");
+            const portalStudent = document.getElementById("portal-student");
+            const portalTeacher = document.getElementById("portal-teacher");
+
+            if (role === "student") {
+                tabStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5";
+                tabTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5";
+                portalStudent.classList.remove("hidden");
+                portalTeacher.classList.add("hidden");
+                updateStudentView();
+            } else {
+                tabTeacher.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 flex justify-center items-center gap-1.5";
+                tabStudent.className = "flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5";
+                portalStudent.classList.add("hidden");
+                portalTeacher.classList.remove("hidden");
+                
+                // 教員データを最新状態に
+                buildTeacherSubjectOptions();
+                buildTeacherRoundOptions(); 
+                buildTeacherDetailOptions(); 
+                buildTeacherMailStudentOptions();
+                loadTeacherControlTable();
+                loadTeacherApplications();
+                renderTeacherTempAttendanceSummary();
+                renderStudentDetailCard();
+            }
         }
 
         function buildSettingsTimetableEditor() {
@@ -1241,6 +1262,7 @@
 
         function updateStudentView() {
             if (!authenticatedStudentId) return;
+            document.getElementById("student-viewing-label").innerText = authenticatedStudentId;
             subjects.forEach(subject => {
                 const records = globalAttendanceData[authenticatedStudentId][subject] || [];
                 let count = records.filter(s => ["出席","公欠","遅刻","仮出席"].includes(s)).length;
