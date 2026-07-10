@@ -33,7 +33,6 @@
                 </div>
                 <div>
                     <h1 class="text-base font-bold tracking-tight">スマート出席管理</h1>
-                    <p class="text-[10px] text-indigo-300 dark:text-slate-400">PBL演習② セキュリティ・構成プロトタイプ</p>
                 </div>
             </div>
             
@@ -626,10 +625,18 @@
                 tr.innerHTML = `
                     <td class="p-2 border dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-semibold text-slate-600 dark:text-slate-400">${row.period}</td>
                     ${['mon','tue','wed','thu','fri','sat'].map(day => {
+                        const currentValue = row[day];
+                        let optionsHtml = `<option value="">-</option>`;
+                        subjects.forEach(sub => {
+                            const selected = sub === currentValue ? "selected" : "";
+                            optionsHtml += `<option value="${sub}" ${selected}>${sub}</option>`;
+                        });
                         return `
                             <td class="p-1 border dark:border-slate-700 bg-white dark:bg-slate-800">
-                                <input type="text" data-row="${i}" data-day="${day}" value="${row[day]}" 
-                                       class="w-full p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none text-center text-xs">
+                                <select data-row="${i}" data-day="${day}" 
+                                        class="w-full p-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white rounded focus:ring-1 focus:ring-indigo-500 focus:outline-none text-center text-xs">
+                                    ${optionsHtml}
+                                </select>
                             </td>
                         `;
                     }).join('')}
@@ -639,11 +646,11 @@
         }
 
         function saveCustomTimetable() {
-            const inputs = document.querySelectorAll("#settings-timetable-tbody input");
-            inputs.forEach(input => {
-                const rIndex = parseInt(input.dataset.row);
-                const day = input.dataset.day;
-                timetableMap[rIndex][day] = input.value.trim();
+            const selects = document.querySelectorAll("#settings-timetable-tbody select");
+            selects.forEach(select => {
+                const rIndex = parseInt(select.dataset.row);
+                const day = select.dataset.day;
+                timetableMap[rIndex][day] = select.value;
             });
 
             let newSubjectsSet = new Set();
@@ -1006,6 +1013,7 @@
             buildTeacherSubjectOptions();
             buildTeacherDetailOptions(); 
             buildApplySubjectOptions();
+            buildSettingsTimetableEditor(); // 【追加】学生側のプルダウン選択リストも最新科目付きでリアルタイム再生成
             renderTimetable();
             document.getElementById("teacher-subject-select").value = newSub;
             document.getElementById("teacher-detail-subject-select").value = newSub;
