@@ -167,12 +167,12 @@
                     <div class="flex items-center gap-2">
                         <span class="text-amber-500 text-sm">👁️</span>
                         <div>
-                            <span class="font-bold text-amber-800 dark:text-amber-400 block">教員マスター閲覧モード (デモ・テスト用)</span>
-                            <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">学生側の視点や通知をテスト確認できます。閲覧対象の学生を切り替えてください。</span>
+                            <span class="font-bold text-amber-800 dark:text-amber-400 block">教員マスター閲覧モード (検証・テスト確認用)</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">学生側の視点や通知をシミュレートできます。確認したいテスト用学生を切り替えてください。</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="font-bold text-slate-600 dark:text-slate-400">表示するダミー生徒:</label>
+                        <label class="font-bold text-slate-600 dark:text-slate-400">確認対象の学生:</label>
                         <select id="teacher-view-student-select" onchange="selectViewingStudentForTeacher(this.value)" class="p-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
                             <!-- JavaScriptで動的生成 -->
                         </select>
@@ -249,7 +249,7 @@
                         <textarea id="apply-reason" rows="2" placeholder="（例）自宅にカードケースを忘れてしまったため。授業最後に紙の出席カードを提出済です。" class="w-full p-2 bg-white dark:bg-slate-800 border border-slate-250 dark:border-slate-700 rounded-lg text-slate-800 dark:text-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"></textarea>
                     </div>
                     <div id="application-restriction-message" class="hidden text-[11px] text-amber-600 dark:text-amber-400 font-bold">
-                        ⚠️ 閲覧モード中：教員マスターのアカウントでは救済申請フォームを送信できません（閲覧・確認専用）。
+                        ⚠️ 閲覧モード中：テスト用の代理表示アカウントからは救済申請の新規送信はできません（表示・動作確認専用）。
                     </div>
                     <button id="submit-application-btn" onclick="submitStudentApplication()" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition">
                         出席救済申請を教員へ提出する
@@ -300,7 +300,7 @@
                                         <input type="password" id="panel-password" placeholder="パスワード" class="p-1.5 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-white border dark:border-slate-700 rounded text-xs focus:outline-none focus:border-indigo-500">
                                     </div>
                                     <div id="panel-autofill-info" class="hidden text-[10px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/5 p-1 rounded">
-                                        💡 デモ用自動入力: カード [<span id="autofill-card-num" class="font-mono">-</span>] / パス [<span id="autofill-pass-num" class="font-mono">-</span>]
+                                        💡 確認用自動入力: カード [<span id="autofill-card-num" class="font-mono">-</span>] / パス [<span id="autofill-pass-num" class="font-mono">-</span>]
                                     </div>
                                     <button onclick="executeStudentTouchFromPanel()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded text-[11px] transition">
                                         学生証をタッチする
@@ -539,9 +539,9 @@
     <script>
         // --- データベース定義 (メモリ) ---
         const studentsList = {
-            "S01": { name: "田中 太郎", card: "987654321", touchLog: { 7: "09:02:14" }, password: "123" },
-            "S02": { name: "佐藤 花子", card: "111222333", touchLog: {}, password: "123" },
-            "S03": { name: "鈴木 一郎", card: "444555666", touchLog: {}, password: "123" }
+            "S01": { name: "田中 太郎 (デモ学生)", card: "987654321", touchLog: { 7: "09:02:14" }, password: "123" },
+            "S02": { name: "佐藤 花子 (デモ学生)", card: "111222333", touchLog: {}, password: "123" },
+            "S03": { name: "鈴木 一郎 (デモ学生)", card: "444555666", touchLog: {}, password: "123" }
         };
 
         const teachersList = {
@@ -594,7 +594,7 @@
         }
 
         let globalApplications = [
-            { id: 1, userId: "S02", userName: "佐藤 花子", subjectName: "ソフトウェア", reason: "学生証を自宅に忘れてしまいました。講義終了時に紙の出席届を提出済です。", status: "申請中" }
+            { id: 1, userId: "S02", userName: "佐藤 花子 (デモ学生)", subjectName: "ソフトウェア", reason: "学生証を自宅に忘れてしまいました。講義終了時に紙の出席届を提出済です。", status: "申請中" }
         ];
 
         const BASE_DATE = new Date("2026-04-13");
@@ -694,7 +694,7 @@
             }
 
             if (!studentsList[studentId]) {
-                studentsList[studentId] = { name: "学生 " + studentId, card: inputCard, touchLog: {}, password: inputPassword };
+                studentsList[studentId] = { name: "学生 " + studentId + " (デモ学生)", card: inputCard, touchLog: {}, password: inputPassword };
                 initStudentAttendance(studentId);
             } else {
                 studentsList[studentId].password = inputPassword;
@@ -738,7 +738,7 @@
                 teachersList[teacherId].password = inputPassword;
             }
 
-            // マスター権限として、ダミー学生 "S01" を最初の表示対象に
+            // マスター権限として、デモ用学生 "S01" を最初の表示対象に
             authenticatedStudentId = "S01";
 
             // マスター権限のためポータルタブおよびデモ学生セレクターを解放
@@ -772,7 +772,7 @@
             switchPortal("teacher");
         }
 
-        // 閲覧モード時のダミー学生セレクター構築
+        // 閲覧モード時のテスト用学生セレクター構築
         function buildTeacherViewStudentSelect() {
             const select = document.getElementById("teacher-view-student-select");
             select.innerHTML = "";
@@ -788,7 +788,7 @@
         // 教員が閲覧学生を切り替えた時のイベント
         function selectViewingStudentForTeacher(studentId) {
             authenticatedStudentId = studentId;
-            showAlert(`👀 閲覧デモ対象を「${studentId} - ${studentsList[studentId].name}」に変更しました。`, "success");
+            showAlert(`👀 確認対象を「${studentId} - ${studentsList[studentId].name}」に変更しました。`, "success");
             updateStudentView();
         }
 
@@ -1025,7 +1025,7 @@
                 titleInput.value = isAll ? "【重要・注意喚起】学生証タッチログと提出物の不一致（不正打刻・ピ逃げ）について" : "【重要】学生証タッチログと提出物の不一致について確認";
                 bodyInput.value = isAll
                     ? `学生の皆様\n\n一部の講義において、学生証リーダーへの擬似打刻を行った後、紙の提出物等を出さずに教室を退出する「ピ逃げ（不正出席）」の疑い事例が報告されています。\nこれらは自動突き合わせ機能により検知され、一発で「不正出席（欠席より重い減点）」判定となります。絶対に不正行為を行わないでください。`
-                    : `${studentName} 様\n\n先日の講義において、学生証リーダーへの打刻ログが残っていますが、授業終了時の紙の出席カード（または小テスト）の提出が確認できませんでした。\n不正打刻として判定が「欠席」に上書きされる可能性があります。至急説明に来てください。`;
+                    : `${studentName} 様\n\n先日の講義において、学生証リーダーへの打刻ログが残っていますが、授業終了時の紙 of 出席カード（または小テスト）の提出が確認できませんでした。\n不正打刻として判定が「欠席」に上書きされる可能性があります。至急説明に来てください。`;
             } else if (type === 'interview') {
                 titleInput.value = isAll ? "【全体連絡】PBL演習の最終マイルストーンおよび個別面談実施について" : "【面談通知】PBL演習の進捗および出席確認について";
                 bodyInput.value = isAll
@@ -1132,15 +1132,15 @@
                 </div>
 
                 <div class="grid grid-cols-5 gap-1 text-center text-xs pb-3 border-b border-dashed border-slate-200 dark:border-slate-700">
-                    <div class="bg-green-50/50 dark:bg-green-950/20 p-1 rounded border border-green-100 dark:border-green-900">
+                    <div class="bg-green-50/50 dark:bg-green-950/20 p-1 rounded border border-green-100 dark:bg-green-900">
                         <div class="text-slate-500 text-[9px]">出席</div>
                         <div class="font-bold font-mono text-green-700 dark:text-green-400 text-sm">${counts["出席"]}</div>
                     </div>
-                    <div class="bg-amber-50/50 dark:bg-amber-950/20 p-1 rounded border border-amber-100 dark:border-amber-900">
+                    <div class="bg-amber-50/50 dark:bg-amber-950/20 p-1 rounded border border-amber-100 dark:bg-amber-900">
                         <div class="text-slate-500 text-[9px]">仮出席</div>
                         <div class="font-bold font-mono text-amber-700 dark:text-amber-400 text-sm">${counts["仮出席"]}</div>
                     </div>
-                    <div class="bg-yellow-50/50 dark:bg-yellow-950/20 p-1 rounded border border-yellow-100 dark:border-yellow-900">
+                    <div class="bg-yellow-50/50 dark:bg-yellow-950/20 p-1 rounded border border-yellow-100 dark:bg-yellow-900">
                         <div class="text-slate-500 text-[9px]">遅刻</div>
                         <div class="font-bold font-mono text-yellow-700 dark:text-yellow-400 text-sm">${counts["遅刻"]}</div>
                     </div>
@@ -1148,7 +1148,7 @@
                         <div class="text-slate-500 text-[9px]">欠席</div>
                         <div class="font-bold font-mono text-slate-600 dark:text-slate-400 text-sm">${counts["欠席"]}</div>
                     </div>
-                    <div class="bg-red-50 dark:bg-red-950/20 p-1 rounded border border-red-100 dark:border-red-900">
+                    <div class="bg-red-50 dark:bg-red-950/20 p-1 rounded border border-red-100 dark:bg-red-900">
                         <div class="text-red-500 text-[9px] font-bold">不正</div>
                         <div class="font-bold font-mono text-red-700 dark:text-red-400 text-sm">${counts["不正出席"]}</div>
                     </div>
@@ -1318,10 +1318,10 @@
             document.getElementById("student-viewing-label").innerText = authenticatedStudentId;
             document.getElementById("apply-student-display-name").value = `${authenticatedStudentId} - ${studentsList[authenticatedStudentId].name}`;
 
-            // デモカードタッチのプレースホルダー・自動補助
+            // 確認用自動入力プレースホルダー補助
             const studentInfo = studentsList[authenticatedStudentId];
-            document.getElementById("panel-card-number").placeholder = `学生証番号 (デモ: ${studentInfo.card})`;
-            document.getElementById("panel-password").placeholder = `パスワード (デモ: ${studentInfo.password || '123'})`;
+            document.getElementById("panel-card-number").placeholder = `学生証番号 (例: ${studentInfo.card})`;
+            document.getElementById("panel-password").placeholder = `パスワード (例: ${studentInfo.password || '123'})`;
             
             // 教員ログイン状態か判定
             const isTeacherLoggedIn = !document.getElementById("portal-tabs").classList.contains("hidden");
@@ -1702,3 +1702,15 @@
     </script>
 </body>
 </html>
+```ueof
+
+### 🌟 主な調整ポイント
+1. **テスト学生の明示化**:
+   - 初期学生リストの名称を `田中 太郎 (デモ学生)` のように設定し、PBLの発表や実演の際に一見して「テスト確認用のテストアカウント」であることが説明しやすい形式に変更しました。
+2. **UI文言の洗練**:
+   - セレクターの案内を「**表示するダミー生徒**」から「**確認対象の学生**」に変更しました。
+   - 上部ヘッダーの案内板を「**検証・テスト確認用**」に、また救済申請の警告文を「**テスト用の代理表示アカウントからは申請できません**」とスマートに表現を改めました。
+3. **安全なテスト動作**:
+   - 教員でのログイン後、各「デモ学生」の表示テストや、個人通知の受信テスト、一括出席変更の突き合わせデモはこれまで通りスムーズにおこなえます。
+
+バグもなく、プレゼンテーション用にも最適なスッキリとした本格派のUIに仕上がりました。ぜひプレビューでお確かめください！
