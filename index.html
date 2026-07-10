@@ -53,6 +53,11 @@
                     <span id="week-display" class="bg-amber-50 text-slate-900 font-bold px-2.5 py-0.5 rounded-full ml-1 text-[11px]">第--週目</span>
                 </div>
 
+                <!-- 🔄 役割クイック切替ボタン (リログなしで状態維持したままスイッチ) -->
+                <button id="quick-swap-btn" onclick="quickSwapRole()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg border border-emerald-500/20 font-bold transition flex items-center gap-1 shadow-sm">
+                    🔄 役割クイック切替
+                </button>
+
                 <!-- 🚪 ログアウトボタン (サインイン後表示) -->
                 <button id="logout-btn" onclick="logout()" class="hidden bg-rose-600/80 dark:bg-rose-950/40 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg border border-rose-500/20 font-bold transition">
                     🚪 ログアウト
@@ -61,7 +66,7 @@
         </div>
     </header>
 
-    <!-- 2. ポータル切り替えタブ (教員ログイン完了時のみ表示、学生ログイン時は非表示) -->
+    <!-- 2. ポータル切り替えタブ (教員ログイン完了時、またはクイック切替でのみ表示) -->
     <div id="portal-tabs" class="hidden max-w-6xl mx-auto px-4 mt-6">
         <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
             <button id="tab-student" onclick="switchPortal('student')" class="flex-1 py-3 text-center font-bold text-xs rounded-lg transition-all duration-150 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-50 dark:hover:bg-slate-750 flex justify-center items-center gap-1.5">
@@ -162,17 +167,17 @@
 
             <!-- 👤 学生ポータル -->
             <div id="portal-student" class="fade-in space-y-6">
-                <!-- 教員専用：閲覧学生切り替えセレクター (教員ログイン時のみ表示) -->
+                <!-- 教員専用：閲覧学生切り替えセレクター (教員ログイン、またはクイック切替で表示) -->
                 <div id="teacher-student-selector-panel" class="hidden bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/20 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
                     <div class="flex items-center gap-2">
                         <span class="text-amber-500 text-sm">👁️</span>
                         <div>
-                            <span class="font-bold text-amber-800 dark:text-amber-400 block">教員マスター閲覧モード (検証・テスト確認用)</span>
-                            <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">学生側の視点や通知をシミュレートできます。確認したいテスト用学生を切り替えてください。</span>
+                            <span class="font-bold text-amber-800 dark:text-amber-400 block">教員マスター閲覧モード (デモ・テスト用)</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-[11px] block mt-0.5">学生側の視点や通知をテスト確認できます。閲覧対象の学生を切り替えてください。</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label class="font-bold text-slate-600 dark:text-slate-400">確認対象の学生:</label>
+                        <label class="font-bold text-slate-600 dark:text-slate-400">表示するデモ学生:</label>
                         <select id="teacher-view-student-select" onchange="selectViewingStudentForTeacher(this.value)" class="p-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
                             <!-- JavaScriptで動的生成 -->
                         </select>
@@ -682,6 +687,37 @@
             }
         }
 
+        // 🔄 ログアウト・リログなしで、役割とデータを維持したままシームレスに切り替える関数
+        function quickSwapRole() {
+            const isTabsVisible = !document.getElementById("portal-tabs").classList.contains("hidden");
+            
+            if (isTabsVisible) {
+                // 現在【教員・確認用学生】として見ている状態 -> 【一般学生】へ切り替え
+                // タブとダミーセレクターを隠し、一般の学生ポータルに縮小
+                document.getElementById("portal-tabs").classList.add("hidden");
+                document.getElementById("teacher-student-selector-panel").classList.add("hidden");
+                
+                if (!authenticatedStudentId || authenticatedStudentId.startsWith("T")) {
+                    authenticatedStudentId = "S01"; // 安全なフォールバック
+                }
+                
+                switchPortal("student");
+                showAlert(`🔄 [クイック切替] 一般学生「${authenticatedStudentId}」の視点に切り替えました。状態はすべて保持されています。`, "success");
+            } else {
+                // 現在【一般学生】 -> 【教員マスター】に昇格
+                // 隠されていたタブとダミーセレクターを即時解放
+                document.getElementById("portal-tabs").classList.remove("hidden");
+                document.getElementById("teacher-student-selector-panel").classList.remove("hidden");
+                
+                buildTeacherViewStudentSelect();
+                
+                // 教員用ポータルをデフォルト表示
+                switchPortal("teacher");
+                showAlert("🔄 [クイック切替] 教員マスターポータルに切り替えました。状態はすべて保持されています。", "success");
+            }
+            updateStudentView();
+        }
+
         // 学生ログイン
         function registerAndAuthenticateStudent() {
             const studentId = document.getElementById("auth-student-id").value.trim();
@@ -714,6 +750,7 @@
             document.getElementById("auth-screen").classList.add("hidden");
             document.getElementById("main-dashboard").classList.remove("hidden");
             document.getElementById("logout-btn").classList.remove("hidden");
+            document.getElementById("quick-swap-btn").classList.remove("hidden"); // クイックチェンジャー解放
 
             showAlert(`🎉 学生ポータル: 学籍番号 ${studentId} でログインしました。`, "success");
             buildSettingsTimetableEditor(); 
@@ -752,6 +789,7 @@
             document.getElementById("auth-screen").classList.add("hidden");
             document.getElementById("main-dashboard").classList.remove("hidden");
             document.getElementById("logout-btn").classList.remove("hidden");
+            document.getElementById("quick-swap-btn").classList.remove("hidden"); // クイックチェンジャー解放
 
             showAlert(`👨‍🏫 教員マスターポータル: 教員ID ${teacherId} でログインしました。`, "success");
 
@@ -799,6 +837,7 @@
             document.getElementById("teacher-student-selector-panel").classList.add("hidden");
             document.getElementById("main-dashboard").classList.add("hidden");
             document.getElementById("logout-btn").classList.add("hidden");
+            document.getElementById("quick-swap-btn").classList.add("hidden"); // クイックチェンジャーも隠す
             document.getElementById("auth-screen").classList.remove("hidden");
 
             // 入力リセット
@@ -819,9 +858,9 @@
                 portalStudent.classList.remove("hidden");
                 portalTeacher.classList.add("hidden");
 
-                // 教員がログインしている場合は閲覧用のセレクターを表示する
-                const isTeacher = document.getElementById("portal-tabs").classList.contains("hidden") === false;
-                if (isTeacher) {
+                // 教員がログインしている、またはクイック切替時のみ切り替えパネルを表示
+                const isTabsVisible = !document.getElementById("portal-tabs").classList.contains("hidden");
+                if (isTabsVisible) {
                     document.getElementById("teacher-student-selector-panel").classList.remove("hidden");
                 }
                 updateStudentView();
@@ -1323,14 +1362,14 @@
             document.getElementById("panel-card-number").placeholder = `学生証番号 (例: ${studentInfo.card})`;
             document.getElementById("panel-password").placeholder = `パスワード (例: ${studentInfo.password || '123'})`;
             
-            // 教員ログイン状態か判定
-            const isTeacherLoggedIn = !document.getElementById("portal-tabs").classList.contains("hidden");
+            // 教員ログイン状態、またはクイック切替でタブが解放されているか判定
+            const isTabsVisible = !document.getElementById("portal-tabs").classList.contains("hidden");
             const applyBtn = document.getElementById("submit-application-btn");
             const restrictMsg = document.getElementById("application-restriction-message");
             const autofillPanel = document.getElementById("panel-autofill-info");
 
-            if (isTeacherLoggedIn) {
-                // 救済申請の制限 (閲覧用)
+            if (isTabsVisible) {
+                // クイック切替可能な教員・デモ画面：申請フォームの一部を仮の確認用にロック
                 applyBtn.disabled = true;
                 applyBtn.className = "w-full py-2.5 bg-slate-300 dark:bg-slate-700 text-slate-400 dark:text-slate-500 font-bold rounded-lg cursor-not-allowed transition";
                 restrictMsg.classList.remove("hidden");
@@ -1340,7 +1379,7 @@
                 document.getElementById("autofill-card-num").innerText = studentInfo.card;
                 document.getElementById("autofill-pass-num").innerText = studentInfo.password || "123";
             } else {
-                // 通常一般学生ログイン時
+                // 通常の独立した一般学生ログイン時
                 applyBtn.disabled = false;
                 applyBtn.className = "w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shadow-sm transition";
                 restrictMsg.classList.add("hidden");
@@ -1702,15 +1741,3 @@
     </script>
 </body>
 </html>
-```ueof
-
-### 🌟 主な調整ポイント
-1. **テスト学生の明示化**:
-   - 初期学生リストの名称を `田中 太郎 (デモ学生)` のように設定し、PBLの発表や実演の際に一見して「テスト確認用のテストアカウント」であることが説明しやすい形式に変更しました。
-2. **UI文言の洗練**:
-   - セレクターの案内を「**表示するダミー生徒**」から「**確認対象の学生**」に変更しました。
-   - 上部ヘッダーの案内板を「**検証・テスト確認用**」に、また救済申請の警告文を「**テスト用の代理表示アカウントからは申請できません**」とスマートに表現を改めました。
-3. **安全なテスト動作**:
-   - 教員でのログイン後、各「デモ学生」の表示テストや、個人通知の受信テスト、一括出席変更の突き合わせデモはこれまで通りスムーズにおこなえます。
-
-バグもなく、プレゼンテーション用にも最適なスッキリとした本格派のUIに仕上がりました。ぜひプレビューでお確かめください！
