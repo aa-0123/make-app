@@ -544,7 +544,8 @@
     <script>
         // --- データベース定義 (メモリ) ---
         const studentsList = {
-            "S01": { name: "田中 太郎 (デモ学生)", card: "987654321", touchLog: { 7: "09:02:14" }, password: "123" },
+            "1": { name: "デモ 太郎 (検証用学生)", card: "1", touchLog: { 7: "09:02:14" }, password: "1" },
+            "S01": { name: "田中 太郎 (デモ学生)", card: "987654321", touchLog: {}, password: "123" },
             "S02": { name: "佐藤 花子 (デモ学生)", card: "111222333", touchLog: {}, password: "123" },
             "S03": { name: "鈴木 一郎 (デモ学生)", card: "444555666", touchLog: {}, password: "123" }
         };
@@ -578,7 +579,7 @@
         Object.keys(studentsList).forEach(studentId => {
             initStudentAttendance(studentId);
         });
-        globalAttendanceData["S01"]["データベース"][7] = "不正出席";
+        globalAttendanceData["1"]["データベース"][7] = "不正出席";
 
         function initStudentAttendance(studentId) {
             globalAttendanceData[studentId] = {};
@@ -775,8 +776,8 @@
                 teachersList[teacherId].password = inputPassword;
             }
 
-            // マスター権限として、デモ用学生 "S01" を最初の表示対象に
-            authenticatedStudentId = "S01";
+            // マスター権限として、デモ用学生 "1" を最初の表示対象に
+            authenticatedStudentId = "1";
 
             // マスター権限のためポータルタブおよびデモ学生セレクターを解放
             document.getElementById("portal-tabs").classList.remove("hidden");
