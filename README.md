@@ -8,37 +8,65 @@
 - 月曜〜土曜、1〜6限の授業時間割の自動表示
 - レスポンシブデザイン対応
 
+# システム設計図面
+
+このリポジトリのシステム設計に関する図面です。
+
+---
+
 ## ユースケース図
-- usecaseDiagram
-    actor 学生 as "👤 学生 (S01〜S03)"
-    actor デモ学生 as "🤖 テスト用学生 (1)"
-    actor 教員 as "👨‍🏫 教員 (T01/マスター権限)"
 
-    学生 --> UC_Login_Student : サインインする
-    学生 --> UC_Edit_Timetable : 個人時間割をカスタマイズする
-    学生 --> UC_View_Attendance : 出席進捗を確認する
-    学生 --> UC_Card_Touch : 学生証で疑似打刻する
-    学生 --> UC_Request_Help : 救済申請を出す (当日のみ)
-    学生 --> UC_Receive_Notification : 個人通知・メール履歴を見る
+```mermaid
+graph TD
+    %% アクター定義
+    Student["👤 学生 (S01〜S03)"]
+    DemoStudent["🤖 テスト用学生 (1)"]
+    Teacher["👨‍🏫 教員 (T01/マスター権限)"]
 
-    デモ学生 --> UC_Card_Touch : 疑似打刻する (クイック対応)
+    %% ユースケース
+    UC_Login_Student["サインインする"]
+    UC_Edit_Timetable["個人時間割をカスタマイズする"]
+    UC_View_Attendance["出席進捗を確認する"]
+    UC_Card_Touch["学生証で疑似打刻する"]
+    UC_Request_Help["救済申請を出す (当日のみ)"]
+    UC_Receive_Notification["個人通知・メール履歴を見る"]
 
-    教員 --> UC_Login_Teacher : サインインする
-    教員 --> UC_Switch_View : 学生ポータルへ切り替える (マスター)
-    教員 --> UC_View_Detail_Karte : 個別学生カルテを照会する
-    教員 --> UC_Control_Table : 出席手動修正・一括保存を行う
-    教員 --> UC_Approve_Request : 救済申請を承認・却下する
-    教員 --> UC_Send_Mail : 個別・全体メール・掲示板送信を行う
-    教員 --> UC_Add_Subject : 新規開講科目を追加する
-    教員 --> UC_Set_Rules : 突き合わせ基準ルールを変更する
-    教員 --> UC_Quick_Swap : ログアウトなしで役割を切り替える
-    
-    %% 関係性の拡張
-    UC_Switch_View ..> UC_View_Attendance : <<閲覧確認>>
-    UC_Switch_View ..> UC_Card_Touch_Proxy : <<代理疑似打刻>>
-    UC_Card_Touch_Proxy ..> UC_Card_Touch : デモ学生(1)のみ限定
+    UC_Login_Teacher["サインインする"]
+    UC_Switch_View["学生ポータルへ切り替える (マスター)"]
+    UC_View_Detail_Karte["個別学生カルテを照会する"]
+    UC_Control_Table["出席手動修正・一括保存を行う"]
+    UC_Approve_Request["救済申請を承認・却下する"]
+    UC_Send_Mail["個別・全体メール・掲示板送信を行う"]
+    UC_Add_Subject["新規開講科目を追加する"]
+    UC_Set_Rules["突き合わせ基準ルールを変更する"]
+    UC_Quick_Swap["ログアウトなしで役割を切り替える"]
 
-## クラス図
+    UC_Card_Touch_Proxy["代理疑似打刻"]
+
+    %% 関係性
+    Student --> UC_Login_Student
+    Student --> UC_Edit_Timetable
+    Student --> UC_View_Attendance
+    Student --> UC_Card_Touch
+    Student --> UC_Request_Help
+    Student --> UC_Receive_Notification
+
+    DemoStudent --> UC_Card_Touch
+
+    Teacher --> UC_Login_Teacher
+    Teacher --> UC_Switch_View
+    Teacher --> UC_View_Detail_Karte
+    Teacher --> UC_Control_Table
+    Teacher --> UC_Approve_Request
+    Teacher --> UC_Send_Mail
+    Teacher --> UC_Add_Subject
+    Teacher --> UC_Set_Rules
+    Teacher --> UC_Quick_Swap
+
+    UC_Switch_View -.->|閲覧確認| UC_View_Attendance
+    UC_Switch_View -.->|代理疑似打刻| UC_Card_Touch_Proxy
+    UC_Card_Touch_Proxy -.->|デモ学生限定| UC_Card_Touch
+
 classDiagram
     class User {
         +String userId
@@ -101,7 +129,6 @@ classDiagram
     Teacher "1" --> "*" Notification : 配信する
     Student "1" --> "*" Notification : 受信する
 
-## 協調図
 
 graph TD
     %% アクター・オブジェクト定義
@@ -118,9 +145,6 @@ graph TD
     SystemObj -- "6. renderStudentListWithLogs()" --> TeacherObj
     TeacherObj -- "7. setStatus('S01', '不正出席')<br>8. saveTeacherOverride()" --> SystemObj
     SystemObj -- "9. pushGlobalWarning('不正打刻自動警告')" --> StudentObj
-
-## 状態遷移図
-出席判定ステータスの遷移
 
 stateDiagram-v2
     [*] --> 欠席 : 初期状態 (デフォルト)
@@ -144,25 +168,4 @@ stateDiagram-v2
     公欠 --> [*]
     不正出席 --> [*]
 
- 救済申請（不携帯届）の状態遷移
 
- stateDiagram-v2
-    [*] --> 未申請 : 初期状態
-    
-    未申請 --> 申請中 : 学生が理由とパスワードを入力して当日送信
-    
-    state 申請中 {
-        [*] --> 審査待機 : 教員側BOXへプール
-        審査待機 --> 照合中 : 教員が手元の提出物とマッチング確認
-    }
-    
-    申請中 --> 承認 : 教員が【承認】ボタンを押下
-    申請中 --> 却下 : 教員が【却下】ボタンを押下 (または虚偽発覚)
-    
-    承認 --> 出席ステータスに反映 : 出席データを「出席」に上書き補正
-    却下 --> 欠席維持 : 元のステータスに據え置き
-    
-    出席ステータスに反映 --> [*]
-    欠席維持 --> [*]
-
-　
